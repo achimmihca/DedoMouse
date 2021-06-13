@@ -8,7 +8,7 @@
             "name": "Dedo Mouse",
             "type": "python",
             "request": "launch",
-            "program": "main.py",
+            "program": "src/main.py",
             "console": "integratedTerminal"
         }
     ]
