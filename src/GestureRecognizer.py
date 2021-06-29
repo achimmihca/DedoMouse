@@ -44,8 +44,8 @@ class GestureRecognizer:
         pos_percent_x = max(0, min(1, pos_percent_x))
         pos_percent_y = (pos_y - self.config.motion_border_top) / (self.config.capture_height - self.config.motion_border_top - self.config.motion_border_bottom)
         pos_percent_y = max(0, min(1, pos_percent_y))
-        mouse_x = int(self.config.screen_width * pos_percent_x)
-        mouse_y = int(self.config.screen_height * pos_percent_y)
+        mouse_x = int(self.config.screen_offset_x + self.config.screen_width * pos_percent_x)
+        mouse_y = int(self.config.screen_offset_y + self.config.screen_height * pos_percent_y)
 
         cv2.putText(frame, f"{pos_percent_x * 100:.0f} | {pos_percent_y * 100:.0f}", (wrist_x, wrist_y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
         
