@@ -3,3 +3,5 @@ numpy==1.20.3
 opencv-python==4.5.2.52
 pynput==1.7.3
 screeninfo==0.6.7
+pylint==2.9.3
+mypy==0.910

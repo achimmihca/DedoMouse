@@ -1,4 +1,4 @@
-from pynput.mouse import Button, Controller
+from pynput.mouse import Button, Controller  # type: ignore
 from Config import Config
 from PidControl import PidControl
 from util import get_time_ms
@@ -29,7 +29,7 @@ class MouseControl:
         self.mouse_y_pid_control = PidControl(p, i, d)
         self.last_mouse_position_time_ms = get_time_ms()
 
-    def on_new_mouse_position_detected(self, new_mouse_x, new_mouse_y):
+    def on_new_mouse_position_detected(self, new_mouse_x: int, new_mouse_y: int) -> None:
         if self.config.is_control_mouse_position:
             delta_time_seconds = (get_time_ms() - self.last_mouse_position_time_ms) / 1000
             current_x = self.mouse_controller.position[0]
@@ -39,7 +39,7 @@ class MouseControl:
             self.mouse_controller.position = (smooth_mouse_x, smooth_mouse_y)
             self.last_mouse_position_time_ms = get_time_ms()
 
-    def on_click_detected(self):
+    def on_click_detected(self) -> None:
         if self.config.is_control_click:
             self.mouse_controller.click(Button.left, 1)
             print("left click")

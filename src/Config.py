@@ -1,7 +1,7 @@
-from screeninfo import get_monitors
+from screeninfo import get_monitors # type: ignore
 
 class Config:
-    def __init__(self):
+    def __init__(self) -> None:
         self.running = True
         self.use_webcam = True
         
@@ -29,7 +29,7 @@ class Config:
         self.is_control_mouse_position = False
         self.is_control_click = False
 
-    def update_screen_size(self):
+    def update_screen_size(self) -> None:
         self.screen_width = 0
         self.screen_height = 0
 
@@ -45,6 +45,9 @@ class Config:
                 self.screen_offset_x = max(self.screen_offset_x, other_monitor.width)
 
         if self.screen_width <= 0 or self.screen_height <= 0:
-            raise "could not determine screen size"
+            raise ConfigException("could not determine screen size")
 
         print(f"screen size: {self.screen_width} x {self.screen_height}")
+
+class ConfigException(Exception):
+    pass

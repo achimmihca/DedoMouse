@@ -1,6 +1,7 @@
-from util import get_time_ms
 from math import sqrt
-from cv2 import cv2
+from typing import Any
+from cv2 import cv2 # type: ignore
+from util import get_time_ms
 from MouseControl import MouseControl
 from Config import Config
 
@@ -10,7 +11,7 @@ class GestureRecognizer:
         self.mouse_control = mouse_control
         self.last_click_time_ms = 0
 
-    def process_hand_landmarks(self, frame, multi_hand_landmarks):
+    def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> None:
         time_ms = get_time_ms()
 
         wrist_x = 0

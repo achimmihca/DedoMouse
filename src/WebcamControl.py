@@ -1,16 +1,15 @@
+from typing import Any
+from cv2 import cv2 # type: ignore
+import mediapipe as mp # type: ignore
 from Config import Config
-from cv2 import cv2
 from GestureRecognizer import GestureRecognizer
-import mediapipe as mp
 
 class WebcamControl:
     def __init__(self, config: Config, gesture_regocnizer: GestureRecognizer):
         self.config = config
         self.gesture_regocnizer = gesture_regocnizer
 
-    def start_video_capture(self):
-        global mouse_controller
-
+    def start_video_capture(self) -> None:
         if not self.config.running:
             return
 
@@ -46,7 +45,7 @@ class WebcamControl:
         cap.release()
         cv2.destroyAllWindows()
 
-    def draw_overlay(self, frame):
+    def draw_overlay(self, frame: Any) -> None:
         cv2.rectangle(frame, (10, 10), (20, 20), (0, 255, 255), -1)
         cv2.putText(frame, "Double Click", (25, 22), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.8, (0, 255, 255), 1)
 

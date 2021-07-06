@@ -1,4 +1,5 @@
-from pynput import keyboard
+from typing import Any
+from pynput import keyboard # type: ignore
 from Config import Config
 
 class GlobalShortcutControl:
@@ -8,12 +9,12 @@ class GlobalShortcutControl:
         self.toggle_control_mouse_position_keys = [keyboard.Key.f9]
         self.toggle_control_click_keys = [keyboard.Key.f10]
 
-    def start_listener(self):
+    def start_listener(self) -> None:
         keyboard_listener = keyboard.Listener(on_press=self.on_keyboard_pressed)
         # start to listen on a separate thread
         keyboard_listener.start()  
 
-    def on_keyboard_pressed(self, key):
+    def on_keyboard_pressed(self, key: Any) -> bool:
         key_name = self.get_key_name(key)
         print('key pressed: ' + key_name)
         
@@ -31,10 +32,12 @@ class GlobalShortcutControl:
             self.config.is_control_click = not self.config.is_control_click
             print(f"Control click: {self.config.is_control_click}")
 
-    def get_key_name(self, key):
+        return True
+
+    def get_key_name(self, key: Any) -> str:
         try:
             # single-char keys
-            return key.char
+            return key.char # type: ignore
         except:
             # other keys
-            return key.name
+            return key.name # type: ignore
