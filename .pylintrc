@@ -60,7 +60,10 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=c-extension-no-member,
+disable=no-else-return,
+        trailing-newlines,
+        superfluous-parens,
+        c-extension-no-member,
         bare-except,
         invalid-name,
         missing-module-docstring,

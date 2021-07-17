@@ -14,13 +14,13 @@ class WebcamControl:
             return
 
         cap = cv2.VideoCapture(0)
-        
+
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.capture_size.x)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.capture_size.y)
+        cap.set(cv2.CAP_PROP_FPS, self.config.capture_fps)
+
         fps = cap.get(cv2.CAP_PROP_FPS)
         print(f"Frames per second: {fps}")
-
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.capture_width)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.capture_height)
-        cap.set(cv2.CAP_PROP_FPS, self.config.capture_fps)
 
         hands = mp.solutions.hands.Hands(max_num_hands=1)
         

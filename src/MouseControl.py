@@ -1,6 +1,7 @@
 from pynput.mouse import Button, Controller  # type: ignore
 from Config import Config
 from PidControl import PidControl
+from Vector import Vector
 from util import get_time_ms
 
 class MouseControl:
@@ -29,13 +30,12 @@ class MouseControl:
         self.mouse_y_pid_control = PidControl(p, i, d)
         self.last_mouse_position_time_ms = get_time_ms()
 
-    def on_new_mouse_position_detected(self, new_mouse_x: int, new_mouse_y: int) -> None:
+    def on_new_mouse_position_detected(self, new_mouse_px: Vector) -> None:
         if self.config.is_control_mouse_position:
             delta_time_seconds = (get_time_ms() - self.last_mouse_position_time_ms) / 1000
-            current_x = self.mouse_controller.position[0]
-            current_y = self.mouse_controller.position[1]
-            smooth_mouse_x = self.mouse_x_pid_control.get_next_value(current_x, new_mouse_x, delta_time_seconds)
-            smooth_mouse_y = self.mouse_y_pid_control.get_next_value(current_y, new_mouse_y, delta_time_seconds)
+            current_pos = Vector.from_tuple2(self.mouse_controller.position)
+            smooth_mouse_x = self.mouse_x_pid_control.get_next_value(current_pos.x, new_mouse_px.x, delta_time_seconds)
+            smooth_mouse_y = self.mouse_y_pid_control.get_next_value(current_pos.y, new_mouse_px.y, delta_time_seconds)
             self.mouse_controller.position = (smooth_mouse_x, smooth_mouse_y)
             self.last_mouse_position_time_ms = get_time_ms()
 
