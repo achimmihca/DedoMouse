@@ -46,9 +46,4 @@ class WebcamControl:
         cv2.destroyAllWindows()
 
     def draw_overlay(self, frame: Any) -> None:
-        cv2.rectangle(frame, (10, 10), (20, 20), (0, 255, 255), -1)
-        cv2.putText(frame, "Double Click", (25, 22), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.8, (0, 255, 255), 1)
-
-        cv2.rectangle(frame, (170, 10), (180, 20), (0, 255, 0), -1)
-        cv2.putText(frame, "Click", (185, 22), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.8, (0, 255, 0), 1)
-
+        pass

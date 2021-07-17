@@ -39,9 +39,16 @@ class MouseControl:
             self.mouse_controller.position = (smooth_mouse_x, smooth_mouse_y)
             self.last_mouse_position_time_ms = get_time_ms()
 
-    def on_click_detected(self) -> None:
+    def on_left_click_detected(self) -> None:
         if self.config.is_control_click:
             self.mouse_controller.click(Button.left, 1)
             print("left click")
         else:
             print("left click, but ignored")
+
+    def on_right_click_detected(self) -> None:
+        if self.config.is_control_click:
+            self.mouse_controller.click(Button.right, 1)
+            print("right click")
+        else:
+            print("right click, but ignored")
