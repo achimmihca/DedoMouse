@@ -46,6 +46,14 @@ class MouseControl:
         else:
             print("left click, but ignored")
 
+    def on_double_left_click_detected(self) -> None:
+        if self.config.is_control_click:
+            self.mouse_controller.click(Button.left, 1)
+            self.mouse_controller.click(Button.left, 1)
+            print("double left click")
+        else:
+            print("double left click, but ignored")
+
     def on_right_click_detected(self) -> None:
         if self.config.is_control_click:
             self.mouse_controller.click(Button.right, 1)

@@ -14,6 +14,7 @@ class GestureRecognizer:
         self.last_right_click_time_ms = 0
         self.distance_thumb_index_was_above_high_click_threshold_since_last_click = False
         self.distance_thumb_middle_was_above_high_click_threshold_since_last_click = False
+        self.left_click_count = 0
 
     def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> None:
         if (len(multi_hand_landmarks) <= 0):
@@ -70,6 +71,9 @@ class GestureRecognizer:
         distance_thumb_index_percent = Vector.distance(thumb_pos.percent, index_finger_pos.percent)
         distance_thumb_middle_percent = Vector.distance(thumb_pos.percent, middle_finger_pos.percent)
         
+        if (self.last_left_click_time_ms + self.config.single_click_delay_ms <= current_time_ms):
+            self.left_click_count = 0
+
         if (distance_thumb_index_percent > self.config.click_distance_threshold_high_percent):
             self.distance_thumb_index_was_above_high_click_threshold_since_last_click = True
 
@@ -78,8 +82,13 @@ class GestureRecognizer:
 
         if (distance_thumb_index_percent < self.config.click_distance_threshold_low_percent
             and distance_thumb_middle_percent > self.config.click_distance_threshold_high_percent):
-            if (self.last_left_click_time_ms + self.config.click_delay_ms < current_time_ms):
+            
+            if (self.left_click_count == 0
+                    and self.last_left_click_time_ms + self.config.single_click_delay_ms < current_time_ms):
                 self.on_left_click()
+            elif (self.left_click_count == 1
+                    and current_time_ms < self.last_left_click_time_ms + self.config.double_click_delay_ms):
+                self.on_double_left_click()
             self.last_left_click_time_ms = current_time_ms
 
     def detect_right_click(self,
@@ -99,13 +108,20 @@ class GestureRecognizer:
 
         if (distance_thumb_middle_percent < self.config.click_distance_threshold_low_percent
             and distance_thumb_index_percent > self.config.click_distance_threshold_high_percent):
-            if (self.last_right_click_time_ms + self.config.click_delay_ms < current_time_ms):
+            
+            if (self.last_right_click_time_ms + self.config.single_click_delay_ms < current_time_ms):
                 self.on_right_click()
             self.last_right_click_time_ms = current_time_ms
 
     def on_left_click(self) -> None:
         self.distance_thumb_index_was_above_high_click_threshold_since_last_click = False
+        self.left_click_count = self.left_click_count + 1
         self.mouse_control.on_left_click_detected()
+
+    def on_double_left_click(self) -> None:
+        self.distance_thumb_index_was_above_high_click_threshold_since_last_click = False
+        self.left_click_count = 2
+        self.mouse_control.on_double_left_click_detected()
 
     def on_right_click(self) -> None:
         self.distance_thumb_middle_was_above_high_click_threshold_since_last_click = False

@@ -22,7 +22,8 @@ class Config:
         # distance percent of capture_size
         self.click_distance_threshold_low_percent = 0.06
         self.click_distance_threshold_high_percent = self.click_distance_threshold_low_percent * 1.5
-        self.click_delay_ms = 200
+        self.single_click_delay_ms = 600
+        self.double_click_delay_ms = 400
 
         self.damping_factor = 2
         self.is_control_mouse_position = False
