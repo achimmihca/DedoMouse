@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, List
 from cv2 import cv2 # type: ignore
 from util import get_time_ms
 from MouseControl import MouseControl
@@ -15,6 +15,9 @@ class GestureRecognizer:
         self.distance_thumb_index_was_above_high_click_threshold_since_last_click = False
         self.distance_thumb_middle_was_above_high_click_threshold_since_last_click = False
         self.left_click_count = 0
+        self.left_click_start_time_ms = 0
+        self.is_potential_drag_gesture = False
+        self.is_drag_started = False
 
     def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> None:
         if (len(multi_hand_landmarks) <= 0):
@@ -49,6 +52,9 @@ class GestureRecognizer:
         self.detect_left_click(current_time_ms, thumb_pos, index_finger_pos, middle_finger_pos)
         self.detect_right_click(current_time_ms, thumb_pos, index_finger_pos, middle_finger_pos)
 
+        # detect drag
+        self.detect_drag(current_time_ms, thumb_pos, index_finger_pos)
+
     def get_mouse_position_px(self, screen_pos_percent: Vector, frame: Any) -> Vector:
         pos_percent_x = (screen_pos_percent.x - self.config.motion_border_left) / (1 - self.config.motion_border_left - self.config.motion_border_right)
         pos_percent_x = max(0, min(1, pos_percent_x))
@@ -57,17 +63,39 @@ class GestureRecognizer:
         mouse_x = int(self.config.screen_offset.x + self.config.screen_size.x * pos_percent_x)
         mouse_y = int(self.config.screen_offset.y + self.config.screen_size.y * pos_percent_y)
 
-        screen_pos_px = screen_pos_percent.scale(self.config.screen_size).toIntVector()
-        cv2.putText(frame, f"{pos_percent_x * 100:.0f} | {pos_percent_y * 100:.0f}", screen_pos_px.toTuple2(), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
+        screen_pos_px = screen_pos_percent.scale(self.config.capture_size).add(Vector(10, 10)).toIntVector()
+        pos_text = f"{pos_percent_x * 100:.0f} ({mouse_x}) | {pos_percent_y * 100:.0f} ({mouse_y})"
+        cv2.putText(frame, pos_text, screen_pos_px.toTuple2(), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
         
         return Vector(mouse_x, mouse_y, 0)
+
+    def detect_drag(self,
+            current_time_ms: int,
+            thumb_pos: FingerPosition,
+            index_finger_pos: FingerPosition) -> None:
+        # drag start gesture: holding a click gesture (index near thumb for a longer time)
+        # drag end gesture: releasing click gesture (index not near thumb anymore)
+        distance_thumb_index_percent = Vector.distance(thumb_pos.percent, index_finger_pos.percent)
+
+        if (distance_thumb_index_percent > self.config.click_distance_threshold_high_percent):
+            self.is_potential_drag_gesture = False
+
+        if (self.is_drag_started
+                and not self.is_potential_drag_gesture):
+            self.on_end_drag()
+            return
+
+        if (not self.is_drag_started
+                and self.is_potential_drag_gesture
+                and self.left_click_start_time_ms + self.config.drag_start_click_time_ms < current_time_ms):
+            self.on_begin_drag()
 
     def detect_left_click(self,
             current_time_ms: int,
             thumb_pos: FingerPosition,
             index_finger_pos: FingerPosition,
             middle_finger_pos: FingerPosition) -> None:
-        # left-click: (index finger near thumb) and (middle finger not near thumb).        
+        # left-click gesture: (index finger near thumb) and (middle finger not near thumb).        
         distance_thumb_index_percent = Vector.distance(thumb_pos.percent, index_finger_pos.percent)
         distance_thumb_middle_percent = Vector.distance(thumb_pos.percent, middle_finger_pos.percent)
         
@@ -85,7 +113,7 @@ class GestureRecognizer:
             
             if (self.left_click_count == 0
                     and self.last_left_click_time_ms + self.config.single_click_delay_ms < current_time_ms):
-                self.on_left_click()
+                self.on_left_click(current_time_ms)
             elif (self.left_click_count == 1
                     and current_time_ms < self.last_left_click_time_ms + self.config.double_click_delay_ms):
                 self.on_double_left_click()
@@ -96,7 +124,7 @@ class GestureRecognizer:
             thumb_pos: FingerPosition,
             index_finger_pos: FingerPosition,
             middle_finger_pos: FingerPosition) -> None:
-        # right-click: (middle finger near thumb) and (index finger not near thumb).        
+        # right-click gesture: (middle finger near thumb) and (index finger not near thumb).        
         distance_thumb_index_percent = Vector.distance(thumb_pos.percent, index_finger_pos.percent)
         distance_thumb_middle_percent = Vector.distance(thumb_pos.percent, middle_finger_pos.percent)
         
@@ -113,10 +141,12 @@ class GestureRecognizer:
                 self.on_right_click()
             self.last_right_click_time_ms = current_time_ms
 
-    def on_left_click(self) -> None:
+    def on_left_click(self, current_time_ms: int) -> None:
         self.distance_thumb_index_was_above_high_click_threshold_since_last_click = False
         self.left_click_count = self.left_click_count + 1
         self.mouse_control.on_left_click_detected()
+        self.is_potential_drag_gesture = True
+        self.left_click_start_time_ms = current_time_ms
 
     def on_double_left_click(self) -> None:
         self.distance_thumb_index_was_above_high_click_threshold_since_last_click = False
@@ -126,6 +156,15 @@ class GestureRecognizer:
     def on_right_click(self) -> None:
         self.distance_thumb_middle_was_above_high_click_threshold_since_last_click = False
         self.mouse_control.on_right_click_detected()
+
+    def on_begin_drag(self) -> None:
+        self.is_drag_started = True
+        self.mouse_control.on_begin_drag()
+
+    def on_end_drag(self) -> None:
+        self.is_drag_started = False
+        self.is_potential_drag_gesture = False
+        self.mouse_control.on_end_drag()
 
 class FingerPosition:
     def __init__(self, landmark: Any, capture_size: Vector) -> None:

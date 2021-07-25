@@ -29,6 +29,7 @@ class MouseControl:
         self.mouse_x_pid_control = PidControl(p, i, d)
         self.mouse_y_pid_control = PidControl(p, i, d)
         self.last_mouse_position_time_ms = get_time_ms()
+        self.is_drag_started = False
 
     def on_new_mouse_position_detected(self, new_mouse_px: Vector) -> None:
         if self.config.is_control_mouse_position:
@@ -40,6 +41,10 @@ class MouseControl:
             self.last_mouse_position_time_ms = get_time_ms()
 
     def on_left_click_detected(self) -> None:
+        if self.is_drag_started:
+            print("left click, but ongoing drag")
+            return
+
         if self.config.is_control_click:
             self.mouse_controller.click(Button.left, 1)
             print("left click")
@@ -47,6 +52,10 @@ class MouseControl:
             print("left click, but ignored")
 
     def on_double_left_click_detected(self) -> None:
+        if self.is_drag_started:
+            print("double click, but ongoing drag")
+            return
+
         if self.config.is_control_click:
             self.mouse_controller.click(Button.left, 1)
             self.mouse_controller.click(Button.left, 1)
@@ -55,8 +64,36 @@ class MouseControl:
             print("double left click, but ignored")
 
     def on_right_click_detected(self) -> None:
+        if self.is_drag_started:
+            print("right click, but ongoing drag")
+            return
+
         if self.config.is_control_click:
             self.mouse_controller.click(Button.right, 1)
             print("right click")
         else:
             print("right click, but ignored")
+
+    def on_begin_drag(self) -> None:
+        if self.is_drag_started:
+            print("begin drag but drag already started, thus ignored")
+            return
+
+        self.is_drag_started = True
+        if self.config.is_control_click:
+            self.mouse_controller.press(Button.left)
+            print("begin drag")
+        else:
+            print("begin drag but ignored")
+
+    def on_end_drag(self) -> None:
+        if not self.is_drag_started:
+            print("end drag but no drag started yet, thus ignored")
+            return
+
+        self.is_drag_started = False
+        if self.config.is_control_click:
+            self.mouse_controller.release(Button.left)
+            print("end drag")
+        else:
+            print("end drag but ignored")
