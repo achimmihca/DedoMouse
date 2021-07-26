@@ -5,9 +5,6 @@ from Config import Config
 class GlobalShortcutControl:
     def __init__(self, config: Config):
         self.config = config
-        self.exit_keys = [keyboard.Key.esc, keyboard.Key.f7]
-        self.toggle_control_mouse_position_keys = [keyboard.Key.f9]
-        self.toggle_control_click_keys = [keyboard.Key.f10]
 
     def start_listener(self) -> None:
         keyboard_listener = keyboard.Listener(on_press=self.on_keyboard_pressed)
@@ -18,19 +15,23 @@ class GlobalShortcutControl:
         key_name = self.get_key_name(key)
         print('key pressed: ' + key_name)
         
-        if key in self.exit_keys:
+        if key in self.config.exit_keys:
             print('on_keyboard_pressed - stopping main loop because of key press: ' + key_name)
             self.config.running = False
             # stop listener by returning False
             return False
 
-        if key in self.toggle_control_mouse_position_keys:
+        if key in self.config.toggle_control_mouse_position_keys:
             self.config.is_control_mouse_position = not self.config.is_control_mouse_position
             print(f"Control mouse position: {self.config.is_control_mouse_position}")
 
-        if key in self.toggle_control_click_keys:
+        if key in self.config.toggle_control_click_keys:
             self.config.is_control_click = not self.config.is_control_click
             print(f"Control click: {self.config.is_control_click}")
+
+        if key in self.config.toggle_control_scroll_keys:
+            self.config.is_control_scroll = not self.config.is_control_scroll
+            print(f"Control scroll: {self.config.is_control_scroll}")
 
         return True
 

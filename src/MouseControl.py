@@ -97,3 +97,14 @@ class MouseControl:
             print("end drag")
         else:
             print("end drag but ignored")
+
+    def on_scroll_up(self) -> None:
+        if self.is_drag_started:
+            print("scroll up, but ongoing drag")
+            return
+
+        if self.config.is_control_scroll:
+            self.mouse_controller.scroll(0, 1)
+            print("scroll up")
+        else:
+            print("scroll up, but ignored")

@@ -1,4 +1,5 @@
 from screeninfo import get_monitors # type: ignore
+from pynput import keyboard # type: ignore
 
 from Vector import Vector
 
@@ -23,16 +24,25 @@ class Config:
         self.click_distance_threshold_low_percent = 0.06
         self.click_distance_threshold_high_percent = self.click_distance_threshold_low_percent * 1.5
         # Min time between two single click gestures.
-        self.single_click_delay_ms = 600
+        self.single_click_pause_ms = 600
         # Max time between two single click gestures for triggering a double click.
         # A double click is fired when two click gestures are detected with less time between them.
-        self.double_click_delay_ms = 400
+        self.double_click_max_pause_ms = 400
+        # Min time between two scroll events
+        self.initial_scroll_pause_ms = 800
+        self.continued_scroll_pause_ms = 100
         # A drag gesture is started when a click is held for at least this duration.
-        self.drag_start_click_time_ms = 1000
+        self.drag_start_click_delay_ms = 1000
 
         self.damping_factor = 2
         self.is_control_mouse_position = False
         self.is_control_click = False
+        self.is_control_scroll = False
+
+        self.exit_keys = [keyboard.Key.esc, keyboard.Key.f4]
+        self.toggle_control_mouse_position_keys = [keyboard.Key.f9]
+        self.toggle_control_click_keys = [keyboard.Key.f10]
+        self.toggle_control_scroll_keys = [keyboard.Key.f8]
 
     def update_screen_size(self) -> None:
         self.screen_size = Vector(0, 0)
