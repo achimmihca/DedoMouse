@@ -1,3 +1,6 @@
+from __future__ import annotations
+from enum import Enum
+from typing import Any
 from pynput.mouse import Button, Controller  # type: ignore
 from Config import Config
 from PidControl import PidControl
@@ -40,16 +43,17 @@ class MouseControl:
             self.mouse_controller.position = (smooth_mouse_x, smooth_mouse_y)
             self.last_mouse_position_time_ms = get_time_ms()
 
-    def on_left_click_detected(self) -> None:
+    def on_single_click_detected(self, mouse_button: MouseButton) -> None:
+        mouse_button_name = mouse_button.get_name()
         if self.is_drag_started:
-            print("left click, but ongoing drag")
+            print(f"{mouse_button_name} click, but ongoing drag")
             return
 
         if self.config.is_control_click:
-            self.mouse_controller.click(Button.left, 1)
-            print("left click")
+            self.mouse_controller.click(mouse_button.get_pynput_value(), 1)
+            print(f"{mouse_button_name} click")
         else:
-            print("left click, but ignored")
+            print(f"{mouse_button_name} click, but ignored")
 
     def on_double_left_click_detected(self) -> None:
         if self.is_drag_started:
@@ -62,17 +66,6 @@ class MouseControl:
             print("double left click")
         else:
             print("double left click, but ignored")
-
-    def on_right_click_detected(self) -> None:
-        if self.is_drag_started:
-            print("right click, but ongoing drag")
-            return
-
-        if self.config.is_control_click:
-            self.mouse_controller.click(Button.right, 1)
-            print("right click")
-        else:
-            print("right click, but ignored")
 
     def on_begin_drag(self) -> None:
         if self.is_drag_started:
@@ -121,3 +114,26 @@ class MouseControl:
         if (x == 0 and y < 0):
             return "down"
         return "diagonal"
+
+class MouseButton(Enum):
+    LEFT = 1
+    RIGHT = 2
+    MIDDLE = 3
+
+    def get_name(self) -> str:
+        if self == MouseButton.LEFT:
+            return "left"
+        if self == MouseButton.RIGHT:
+            return "right"
+        if self == MouseButton.MIDDLE:
+            return "middle"
+        raise Exception(f"Unkown mouse button {self}")
+
+    def get_pynput_value(self) -> Any:
+        if self == MouseButton.LEFT:
+            return Button.left
+        if self == MouseButton.RIGHT:
+            return Button.right
+        if self == MouseButton.MIDDLE:
+            return Button.middle
+        raise Exception(f"Unkown mouse button {self}")

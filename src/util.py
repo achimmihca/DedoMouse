@@ -1,5 +1,5 @@
 import time
-from typing import Any, Callable, List, TypeVar
+from typing import Callable, List, TypeVar
 
 T = TypeVar('T')
 
