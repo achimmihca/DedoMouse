@@ -13,14 +13,14 @@ class Config:
         self.screen_size = Vector(1280, 720)
         self.screen_offset = Vector(0, 0)
         self.capture_size = Vector(1280, 720)
-        self.capture_fps = 5
+        self.capture_fps = 30
         # Motion does not (cannot) use the full capture range
         self.motion_border_left = 0.15
         self.motion_border_right = 0.15
         self.motion_border_top = 0.3
         self.motion_border_bottom = 0.15
 
-        # Distance percent of capture_size
+        # Distance percent of capture_size.
         self.click_distance_threshold_low_percent = 0.06
         self.click_distance_threshold_high_percent = self.click_distance_threshold_low_percent * 1.5
         # Min time between two single click gestures.
@@ -28,8 +28,9 @@ class Config:
         # Max time between two single click gestures for triggering a double click.
         # A double click is fired when two click gestures are detected with less time between them.
         self.double_click_max_pause_ms = 400
-        # Min time between two scroll events
-        self.initial_scroll_pause_ms = 800
+        # Wait time before changing to continued scroll mode.
+        self.continued_scroll_mode_delay_ms = 1200
+        # Min time between two scroll events in continued scroll mode.
         self.continued_scroll_pause_ms = 100
         # A drag gesture is started when a click is held for at least this duration.
         self.drag_start_click_delay_ms = 1000

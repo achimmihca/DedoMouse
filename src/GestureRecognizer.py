@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import Any, List, cast
+from enum import Enum
+from typing import Any, List
 from cv2 import cv2 # type: ignore
-from util import all_decreasing, all_increasing, get_min_element, get_time_ms, get_elements_except
+from util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except
 from MouseControl import MouseControl
 from Config import Config
 from Vector import Vector
@@ -31,7 +32,8 @@ class GestureRecognizer:
 
         self.last_scroll_time_ms = 0
         self.start_scroll_time_ms = 0
-        self.was_thumbs_up_last_frame = False
+        self.was_thumb_up_last_frame = False
+        self.was_thumb_down_last_frame = False
 
     def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> None:
         if (len(multi_hand_landmarks) <= 0):
@@ -70,7 +72,7 @@ class GestureRecognizer:
         self.detect_drag(current_time_ms, thumb_pos, index_finger_pos)
 
         # detect scroll
-        self.detect_scoll(current_time_ms, first_hand_landmarks)
+        self.detect_scoll(current_time_ms, first_hand_landmarks, frame)
 
     def get_mouse_position_px(self, screen_pos_percent: Vector, frame: Any) -> Vector:
         pos_percent_x = (screen_pos_percent.x - self.config.motion_border_left) / (1 - self.config.motion_border_left - self.config.motion_border_right)
@@ -88,28 +90,40 @@ class GestureRecognizer:
 
     def detect_scoll(self,
             current_time_ms: int,
-            first_hand_landmarks: Any) -> None:
-        # scroll up gesture: thumbs up
-        # scroll down gesture: thumbs up, i.e., thumb is stretched and downwards, other fingers curved and vertically aligned
-        finger_positions = HandFingerPositions(first_hand_landmarks, self.config.capture_size)
+            first_hand_landmarks: Any,
+            frame: Any) -> None:
+        # scroll up gesture: thumb up
+        # scroll down gesture: thumb down
+        hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.config.capture_size)
 
-        is_thumbs_up = self.is_thumbs_up(finger_positions)
-        if (not is_thumbs_up):
+        # scrolling down is more common, thus check first thumb-down gesture
+        is_thumb_down = self.is_thumb_down(hand_finger_positions)
+        # thumb-up gesture is a relatively complex calculation, thus assume false if thumb-down gesture has been detected already.
+        is_thumb_up = not is_thumb_down and self.is_thumb_up(hand_finger_positions)
+
+        if (not is_thumb_up and not is_thumb_down):
+            # not scrolling in any direction
             self.start_scroll_time_ms = 0
-            
-        if (is_thumbs_up and not self.was_thumbs_up_last_frame):
+        
+        # find risink flank of thumb gesture
+        is_initial_scroll = False
+        if ((is_thumb_up and not self.was_thumb_up_last_frame)
+                or (is_thumb_down and not self.was_thumb_down_last_frame)):
             self.start_scroll_time_ms = current_time_ms
+            is_initial_scroll = True
 
-        scroll_pause_ms = self.config.initial_scroll_pause_ms
-        if self.start_scroll_time_ms + self.config.initial_scroll_pause_ms < current_time_ms:
-            scroll_pause_ms = self.config.continued_scroll_pause_ms
+        if is_thumb_up or is_thumb_down:
+            is_continued_scroll_mode = self.start_scroll_time_ms + self.config.continued_scroll_mode_delay_ms <= current_time_ms
+            is_continued_scroll_needed = self.last_scroll_time_ms + self.config.continued_scroll_pause_ms <= current_time_ms
+            is_scroll_needed_now = is_initial_scroll or (is_continued_scroll_mode and is_continued_scroll_needed)
+            if (is_scroll_needed_now):
+                if (is_thumb_up):
+                    self.on_scroll(0, 1, current_time_ms)
+                if (is_thumb_down):
+                    self.on_scroll(0, -1, current_time_ms)
 
-        if (is_thumbs_up
-                and (self.last_scroll_time_ms == 0
-                     or self.last_scroll_time_ms + scroll_pause_ms < current_time_ms)):
-            self.on_scroll_up(current_time_ms)
-
-        self.was_thumbs_up_last_frame = is_thumbs_up
+        self.was_thumb_up_last_frame = is_thumb_up
+        self.was_thumb_down_last_frame = is_thumb_down
 
     def detect_drag(self,
             current_time_ms: int,
@@ -129,7 +143,7 @@ class GestureRecognizer:
 
         if (not self.is_drag_started
                 and self.is_potential_drag_gesture
-                and self.left_click_start_time_ms + self.config.drag_start_click_delay_ms < current_time_ms):
+                and self.left_click_start_time_ms + self.config.drag_start_click_delay_ms <= current_time_ms):
             self.on_begin_drag()
 
     def detect_left_click(self,
@@ -154,7 +168,7 @@ class GestureRecognizer:
             and distance_thumb_middle_percent > self.config.click_distance_threshold_high_percent):
             
             if (self.left_click_count == 0
-                    and self.last_left_click_time_ms + self.config.single_click_pause_ms < current_time_ms):
+                    and self.last_left_click_time_ms + self.config.single_click_pause_ms <= current_time_ms):
                 self.on_left_click(current_time_ms)
             elif (self.left_click_count == 1
                     and current_time_ms < self.last_left_click_time_ms + self.config.double_click_max_pause_ms):
@@ -179,47 +193,76 @@ class GestureRecognizer:
         if (distance_thumb_middle_percent < self.config.click_distance_threshold_low_percent
             and distance_thumb_index_percent > self.config.click_distance_threshold_high_percent):
             
-            if (self.last_right_click_time_ms + self.config.single_click_pause_ms < current_time_ms):
+            if (self.last_right_click_time_ms + self.config.single_click_pause_ms <= current_time_ms):
                 self.on_right_click()
             self.last_right_click_time_ms = current_time_ms
 
-    def is_thumbs_up(self,
+    def is_thumb_up(self,
             hand_finger_positions: HandFingerPositions) -> bool:
         # thumbs up: thumb is stretched and upwards, other fingers curved and vertically aligned
         
         # thumb must be vertically aligned upwards
         if (not self.is_vertically_aligned_upwards(hand_finger_positions.thumb_finger_positions)):
             return False
-
+        
         # thumb must be at the top
-        relevant_thumb_positions = get_elements_except(hand_finger_positions.thumb_finger_positions, [hand_finger_positions.thumb_finger_positions[0]])
+        relevant_thumb_positions = get_elements_except(hand_finger_positions.thumb_finger_positions, [hand_finger_positions.thumb_finger_positions[0], hand_finger_positions.thumb_finger_positions[1]])
         lowest_thumb_joint = get_min_element(relevant_thumb_positions, lambda finger_position: finger_position.px.y)
         all_finger_positions_except_thumb = get_elements_except(hand_finger_positions.all_finger_positions, hand_finger_positions.thumb_finger_positions)
         is_thumb_at_top = all(finger_position.px.y > lowest_thumb_joint.px.y for finger_position in all_finger_positions_except_thumb)
         if (not is_thumb_at_top):
             return False
 
-        # other finger joints are vertically aligned
-        first_column_finger_positions = hand_finger_positions.get_finger_positions_by_index([5, 9, 13, 17])
-        second_column_finger_positions = hand_finger_positions.get_finger_positions_by_index([6, 10, 14, 18])
-        third_column_finger_positions = hand_finger_positions.get_finger_positions_by_index([7, 11, 15, 19])
-        fourth_column_finger_positions = hand_finger_positions.get_finger_positions_by_index([8, 12, 16, 20])
-        all_columns_vertically_aligned = all(self.is_vertically_aligned_downwards(column_finger_positions)
-                for column_finger_positions in [first_column_finger_positions,
-                                                second_column_finger_positions,
-                                                third_column_finger_positions,
-                                                fourth_column_finger_positions])
-        if (not all_columns_vertically_aligned):
+        # other finger joints are vertically aligned and curved
+        if (not self.is_fingers_aligned_for_thumb_up_or_thumb_down(hand_finger_positions, ThumbGestureDirection.UP)):
             return False
 
-        # other fingers are curved
+        return True
+
+    def is_thumb_down(self,
+            hand_finger_positions: HandFingerPositions) -> bool:
+        # thumbs down: thumb is stretched and downwards, other fingers curved and vertically aligned
+        
+        # thumb must be vertically aligned downwards
+        if (not self.is_vertically_aligned_downwards(hand_finger_positions.thumb_finger_positions)):
+            return False
+
+        # thumb must be at the bottom
+        relevant_thumb_positions = get_elements_except(hand_finger_positions.thumb_finger_positions, [hand_finger_positions.thumb_finger_positions[0], hand_finger_positions.thumb_finger_positions[1]])
+        highest_thumb_joint = get_max_element(relevant_thumb_positions, lambda finger_position: finger_position.px.y)
+        all_finger_positions_except_thumb = get_elements_except(hand_finger_positions.all_finger_positions, hand_finger_positions.thumb_finger_positions)
+        is_thumb_at_bottom = all(finger_position.px.y < highest_thumb_joint.px.y for finger_position in all_finger_positions_except_thumb)
+        if (not is_thumb_at_bottom):
+            return False
+        
+        # other finger joints are vertically aligned and curved
+        if (not self.is_fingers_aligned_for_thumb_up_or_thumb_down(hand_finger_positions, ThumbGestureDirection.DOWN)):
+            return False
+        
+        return True
+
+    def is_fingers_aligned_for_thumb_up_or_thumb_down(self, hand_finger_positions: HandFingerPositions, direction: ThumbGestureDirection) -> bool:
+        # Fingers are curved
         if (self.is_finger_straight_horizontally(hand_finger_positions.index_finger_positions)
                 or self.is_finger_straight_horizontally(hand_finger_positions.middle_finger_positions)
                 or self.is_finger_straight_horizontally(hand_finger_positions.ring_finger_positions)
                 or self.is_finger_straight_horizontally(hand_finger_positions.pinky_finger_positions)):
             return False
 
-        return True
+        # Finger joints are vertically aligned.
+        # Note that depending on the gesture, the camera is faced with different joints
+        if direction == ThumbGestureDirection.UP:
+            vertically_aligned_check_function = self.is_vertically_aligned_downwards
+            relevant_column_finger_positions = hand_finger_positions.get_finger_positions_by_index([5, 9, 13, 17])
+        elif direction == ThumbGestureDirection.DOWN:
+            vertically_aligned_check_function = self.is_vertically_aligned_upwards
+            relevant_column_finger_positions = hand_finger_positions.get_finger_positions_by_index([6, 10, 14, 18])
+        else:
+            raise Exception(f"Unsupported ThumbGestureDirection {direction}")
+
+        all_columns_vertically_aligned = all(vertically_aligned_check_function(column_finger_positions)
+                for column_finger_positions in [relevant_column_finger_positions])
+        return all_columns_vertically_aligned
 
     def is_finger_straight_horizontally(self, finger_positions: List[FingerPosition]) -> bool:
         # strechted finger joints: 0-1-2
@@ -271,9 +314,9 @@ class GestureRecognizer:
         self.is_potential_drag_gesture = False
         self.mouse_control.on_end_drag()
 
-    def on_scroll_up(self, current_time_ms: int) -> None:
+    def on_scroll(self, x: int, y: int, current_time_ms: int) -> None:
         self.last_scroll_time_ms = current_time_ms
-        self.mouse_control.on_scroll_up()
+        self.mouse_control.on_scroll(x, y)
 
 class HandFingerPositions:
     def __init__(self, single_hand_landmarks: Any, capture_size: Vector) -> None:
@@ -334,3 +377,7 @@ class FingerPosition:
     def __init__(self, landmark: Any, capture_size: Vector) -> None:
         self.percent = Vector.from_xy(landmark)
         self.px = self.percent.scale(capture_size).toIntVector()
+
+class ThumbGestureDirection(Enum):
+    UP = 1
+    DOWN = 2

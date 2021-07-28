@@ -98,13 +98,26 @@ class MouseControl:
         else:
             print("end drag but ignored")
 
-    def on_scroll_up(self) -> None:
+    def on_scroll(self, x: int, y: int) -> None:
+        scroll_direction = self.get_scroll_direction(x, y)
+
         if self.is_drag_started:
-            print("scroll up, but ongoing drag")
+            print(f"scroll {scroll_direction}, but ongoing drag")
             return
 
         if self.config.is_control_scroll:
-            self.mouse_controller.scroll(0, 1)
-            print("scroll up")
+            self.mouse_controller.scroll(x, y)
+            print(f"scroll {scroll_direction}")
         else:
-            print("scroll up, but ignored")
+            print(f"scroll {scroll_direction}, but ignored")
+
+    def get_scroll_direction(self, x: int, y: int) -> str:
+        if (x > 0 and y == 0):
+            return "right"
+        if (x < 0 and y == 0):
+            return "left"
+        if (x == 0 and y > 0):
+            return "up"
+        if (x == 0 and y < 0):
+            return "down"
+        return "diagonal"

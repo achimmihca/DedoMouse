@@ -22,6 +22,19 @@ def get_min_element(elements: List[T], element_to_value: Callable[[T], float]) -
             min_element_value = element_value
     return min_element
 
+def get_max_element(elements: List[T], element_to_value: Callable[[T], float]) -> T:
+    if not elements:
+        return None # type: ignore
+
+    max_element = elements[0]
+    max_element_value = element_to_value(max_element)
+    for element in elements:
+        element_value = element_to_value(element)
+        if (element_value > max_element_value):
+            max_element = element
+            max_element_value = element_value
+    return max_element
+
 def all_increasing(elements: List[T], element_to_value: Callable[[T], float]) -> bool:
     if not elements:
         return True
