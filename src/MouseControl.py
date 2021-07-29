@@ -3,12 +3,14 @@ from enum import Enum
 from typing import Any
 from pynput.mouse import Button, Controller  # type: ignore
 from Config import Config
+from LogHolder import LogHolder
 from PidControl import PidControl
 from Vector import Vector
 from util import get_time_ms
 
-class MouseControl:
+class MouseControl(LogHolder):
     def __init__(self, config: Config):
+        super().__init__()
         self.config = config
         self.mouse_controller = Controller()
 
@@ -46,63 +48,63 @@ class MouseControl:
     def on_single_click_detected(self, mouse_button: MouseButton) -> None:
         mouse_button_name = mouse_button.get_name()
         if self.is_drag_started:
-            print(f"{mouse_button_name} click, but ongoing drag")
+            self.log.info(f"{mouse_button_name} click, but ongoing drag")
             return
 
         if self.config.is_control_click:
             self.mouse_controller.click(mouse_button.get_pynput_value(), 1)
-            print(f"{mouse_button_name} click")
+            self.log.info(f"{mouse_button_name} click")
         else:
-            print(f"{mouse_button_name} click, but ignored")
+            self.log.info(f"{mouse_button_name} click, but ignored")
 
     def on_double_left_click_detected(self) -> None:
         if self.is_drag_started:
-            print("double click, but ongoing drag")
+            self.log.info("double click, but ongoing drag")
             return
 
         if self.config.is_control_click:
             self.mouse_controller.click(Button.left, 1)
             self.mouse_controller.click(Button.left, 1)
-            print("double left click")
+            self.log.info("double left click")
         else:
-            print("double left click, but ignored")
+            self.log.info("double left click, but ignored")
 
     def on_begin_drag(self) -> None:
         if self.is_drag_started:
-            print("begin drag but drag already started, thus ignored")
+            self.log.info("begin drag but drag already started, thus ignored")
             return
 
         self.is_drag_started = True
         if self.config.is_control_click:
             self.mouse_controller.press(Button.left)
-            print("begin drag")
+            self.log.info("begin drag")
         else:
-            print("begin drag but ignored")
+            self.log.info("begin drag but ignored")
 
     def on_end_drag(self) -> None:
         if not self.is_drag_started:
-            print("end drag but no drag started yet, thus ignored")
+            self.log.info("end drag but no drag started yet, thus ignored")
             return
 
         self.is_drag_started = False
         if self.config.is_control_click:
             self.mouse_controller.release(Button.left)
-            print("end drag")
+            self.log.info("end drag")
         else:
-            print("end drag but ignored")
+            self.log.info("end drag but ignored")
 
     def on_scroll(self, x: int, y: int) -> None:
         scroll_direction = self.get_scroll_direction(x, y)
 
         if self.is_drag_started:
-            print(f"scroll {scroll_direction}, but ongoing drag")
+            self.log.info(f"scroll {scroll_direction}, but ongoing drag")
             return
 
         if self.config.is_control_scroll:
             self.mouse_controller.scroll(x, y)
-            print(f"scroll {scroll_direction}")
+            self.log.info(f"scroll {scroll_direction}")
         else:
-            print(f"scroll {scroll_direction}, but ignored")
+            self.log.info(f"scroll {scroll_direction}, but ignored")
 
     def get_scroll_direction(self, x: int, y: int) -> str:
         if (x > 0 and y == 0):

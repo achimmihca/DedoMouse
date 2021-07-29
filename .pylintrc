@@ -60,7 +60,8 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=no-else-return,
+disable=logging-fstring-interpolation,
+        no-else-return,
         trailing-newlines,
         superfluous-parens,
         c-extension-no-member,
@@ -71,7 +72,6 @@ disable=no-else-return,
         missing-function-docstring,
         missing-final-newline,
         trailing-whitespace,
-        print-statement,
         parameter-unpacking,
         unpacking-in-except,
         old-raise-syntax,
@@ -328,7 +328,7 @@ indent-after-paren=4
 indent-string='    '
 
 # Maximum number of characters on a single line.
-max-line-length=150
+max-line-length=200
 
 # Maximum number of lines in a module.
 max-module-lines=2000

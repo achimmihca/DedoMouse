@@ -3,12 +3,13 @@ from enum import Enum
 from typing import Any, List
 from itertools import chain
 from cv2 import cv2 # type: ignore
+from LogHolder import LogHolder # type: ignore
 from util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except
 from MouseControl import MouseButton, MouseControl
 from Config import Config
 from Vector import Vector
 
-class GestureRecognizer:
+class GestureRecognizer(LogHolder):
     wrist_index = 0
     thumb_finger_indexes = [1, 2, 3, 4]
     index_finger_indexes = [5, 6, 7, 8]
@@ -17,6 +18,7 @@ class GestureRecognizer:
     pinky_finger_indexes = [17, 18, 19, 20]
 
     def __init__(self, config: Config, mouse_control: MouseControl):
+        super().__init__()
         self.config = config
         self.mouse_control = mouse_control
         self.last_left_click_time_ms = 0

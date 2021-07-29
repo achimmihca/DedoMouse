@@ -3,9 +3,11 @@ from cv2 import cv2 # type: ignore
 import mediapipe as mp # type: ignore
 from Config import Config
 from GestureRecognizer import GestureRecognizer
+from LogHolder import LogHolder
 
-class WebcamControl:
+class WebcamControl(LogHolder):
     def __init__(self, config: Config, gesture_regocnizer: GestureRecognizer):
+        super().__init__()
         self.config = config
         self.gesture_regocnizer = gesture_regocnizer
 
@@ -15,12 +17,23 @@ class WebcamControl:
 
         cap = cv2.VideoCapture(0)
 
+        # configure video capture
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.capture_size.x)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.capture_size.y)
         cap.set(cv2.CAP_PROP_FPS, self.config.capture_fps)
 
+        # check video capture configuration was successful
+        width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        if (self.config.capture_size.x != width
+                or self.config.capture_size.y != height):
+            self.log.warning(f"Configured video size {self.config.capture_size.x}x{self.config.capture_size.y} does not match actual video size {width}x{height}")
+
         fps = cap.get(cv2.CAP_PROP_FPS)
-        print(f"Frames per second: {fps}")
+        if (self.config.capture_fps != fps):
+            self.log.warning(f"Configured frames per second {self.config.capture_fps} does not match actual frames per second {fps}")
+
+        self.log.info(f"Capturing video (width: {width}, height: {height}, fps: {fps})")
 
         hands = mp.solutions.hands.Hands(max_num_hands=1)
         

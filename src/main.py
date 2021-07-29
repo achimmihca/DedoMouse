@@ -1,8 +1,15 @@
+import logging
 from Config import Config
+from Log import initLogging
 from MouseControl import MouseControl
 from WebcamControl import WebcamControl
 from GestureRecognizer import GestureRecognizer
 from GlobalShortcutControl import GlobalShortcutControl
+
+initLogging()
+logging.getLogger('root').info("=============================================")
+logging.getLogger('root').info("DedoMouse started")
+logging.getLogger('root').info("=============================================")
 
 config = Config()
 config.update_screen_size()
@@ -16,3 +23,7 @@ gesture_regocnizer = GestureRecognizer(config, mouse_control)
 
 webcam_control = WebcamControl(config, gesture_regocnizer)
 webcam_control.start_video_capture()
+
+logging.getLogger('root').info("=============================================")
+logging.getLogger('root').info("DedoMouse finished")
+logging.getLogger('root').info("=============================================")

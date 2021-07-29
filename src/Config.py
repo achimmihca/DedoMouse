@@ -1,10 +1,13 @@
-from screeninfo import get_monitors # type: ignore
+from __future__ import annotations
 from pynput import keyboard # type: ignore
+from screeninfo import get_monitors # type: ignore
+from LogHolder import LogHolder
 
 from Vector import Vector
 
-class Config:
+class Config(LogHolder):
     def __init__(self) -> None:
+        super().__init__()
         self.running = True
         self.use_webcam = True
         
@@ -49,6 +52,11 @@ class Config:
         self.screen_size = Vector(0, 0)
 
         monitors = get_monitors()
+
+        if len(monitors) <= self.monitor_index:
+            self.log.warning(f"no monitor at index {self.monitor_index}. Using monitor at index 0 instead.")
+            self.monitor_index = 0
+
         selected_monitor = monitors[self.monitor_index]
         self.screen_size = Vector(selected_monitor.width, selected_monitor.height)
 
@@ -62,7 +70,7 @@ class Config:
         if self.screen_size.x <= 0 or self.screen_size.y <= 0:
             raise ConfigException("could not determine screen size")
 
-        print(f"screen size: {self.screen_size.x} x {self.screen_size.y}")
+        self.log.info(f"screen size: {self.screen_size.x} x {self.screen_size.y}")
 
 class ConfigException(Exception):
     pass
