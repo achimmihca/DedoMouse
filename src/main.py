@@ -11,7 +11,7 @@ logging.getLogger('root').info("=============================================")
 logging.getLogger('root').info("DedoMouse started")
 logging.getLogger('root').info("=============================================")
 
-config = Config()
+config = Config.load_from_file()
 config.update_screen_size()
 
 shortcut_control = GlobalShortcutControl(config)
@@ -23,6 +23,8 @@ gesture_regocnizer = GestureRecognizer(config, mouse_control)
 
 webcam_control = WebcamControl(config, gesture_regocnizer)
 webcam_control.start_video_capture()
+
+config.save_to_file()
 
 logging.getLogger('root').info("=============================================")
 logging.getLogger('root').info("DedoMouse finished")

@@ -1,11 +1,27 @@
+from typing import Any, Callable, List, TypeVar, Type
 import time
-from typing import Callable, List, TypeVar
+import jsonpickle # type: ignore
 
+#############################################
+# Type Variables for Generics
 T = TypeVar('T')
 
+#############################################
+# Time Utils
 def get_time_ms() -> int:
     return time.time_ns() // 1_000_000 
 
+#############################################
+# JSON Utils
+def to_json(obj: Any, pretty_print: bool = False) -> str:
+    indent = 4 if pretty_print else None
+    return jsonpickle.encode(obj, indent=indent) # type: ignore
+    
+def from_json(json_string: str, _: Type[T]) -> T:
+    return jsonpickle.decode(json_string) # type: ignore
+
+#############################################
+# List Utils
 def get_elements_except(all_elements: List[T], elements_to_exclude: List[T]) -> List[T]:
     return [x for x in all_elements if not x in elements_to_exclude]
 
@@ -35,6 +51,8 @@ def get_max_element(elements: List[T], element_to_value: Callable[[T], float]) -
             max_element_value = element_value
     return max_element
 
+#############################################
+# List Predicates
 def all_increasing(elements: List[T], element_to_value: Callable[[T], float]) -> bool:
     if not elements:
         return True

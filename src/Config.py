@@ -1,11 +1,27 @@
 from __future__ import annotations
-from pynput import keyboard # type: ignore
+import logging
 from screeninfo import get_monitors # type: ignore
-from LogHolder import LogHolder
-
 from Vector import Vector
+from util import from_json, to_json
 
-class Config(LogHolder):
+class Config:
+    config_file_path = "config.json"
+    log = logging.getLogger("Config")
+
+    @staticmethod
+    def load_from_file() -> Config:
+        try:
+            with open(file=Config.config_file_path, mode="r", encoding="utf-8") as file:
+                json_string = file.read()
+                config = from_json(json_string, Config)
+                config.running = True
+                Config.log.info(f"Loaded config from '{Config.config_file_path}'.")
+                return config
+        except Exception as e:
+            config = Config()
+            Config.log.warning(f"Created new config. Could not load config from '{Config.config_file_path}': {str(e)}")
+            return config
+
     def __init__(self) -> None:
         super().__init__()
         self.running = True
@@ -43,10 +59,10 @@ class Config(LogHolder):
         self.is_control_click = False
         self.is_control_scroll = False
 
-        self.exit_keys = [keyboard.Key.esc, keyboard.Key.f4]
-        self.toggle_control_mouse_position_keys = [keyboard.Key.f9]
-        self.toggle_control_click_keys = [keyboard.Key.f10]
-        self.toggle_control_scroll_keys = [keyboard.Key.f8]
+        self.exit_keys = ["esc", "f4"]
+        self.toggle_control_mouse_position_keys = ["f9"]
+        self.toggle_control_click_keys = ["f10"]
+        self.toggle_control_scroll_keys = ["f8"]
 
     def update_screen_size(self) -> None:
         self.screen_size = Vector(0, 0)
@@ -54,7 +70,7 @@ class Config(LogHolder):
         monitors = get_monitors()
 
         if len(monitors) <= self.monitor_index:
-            self.log.warning(f"no monitor at index {self.monitor_index}. Using monitor at index 0 instead.")
+            Config.log.warning(f"no monitor at index {self.monitor_index}. Using monitor at index 0 instead.")
             self.monitor_index = 0
 
         selected_monitor = monitors[self.monitor_index]
@@ -70,7 +86,13 @@ class Config(LogHolder):
         if self.screen_size.x <= 0 or self.screen_size.y <= 0:
             raise ConfigException("could not determine screen size")
 
-        self.log.info(f"screen size: {self.screen_size.x} x {self.screen_size.y}")
+        Config.log.info(f"screen size: {self.screen_size.x} x {self.screen_size.y}")
+
+    def save_to_file(self) -> None:
+        json_string = to_json(self, True)
+        with open(file=Config.config_file_path, mode="w", encoding="utf-8") as file:
+            file.write(json_string)
+            Config.log.info(f"Saved config to: {Config.config_file_path}")
 
 class ConfigException(Exception):
     pass
