@@ -1,5 +1,7 @@
 from __future__ import annotations
 import logging
+from os import stat
+from typing import Callable, List
 from screeninfo import get_monitors # type: ignore
 from Vector import Vector
 from util import from_json, to_json
@@ -7,6 +9,7 @@ from util import from_json, to_json
 class Config:
     config_file_path = "config.json"
     log = logging.getLogger("Config")
+    config_change_callbacks: List[Callable] = []
 
     @staticmethod
     def load_from_file() -> Config:
@@ -29,6 +32,11 @@ class Config:
             Config.log.warning(f"Created new config. Could not load config from '{Config.config_file_path}': {str(e)}")
             return loaded_config
 
+    @staticmethod
+    def fire_config_changed_event() -> None:
+        for callback in Config.config_change_callbacks:
+            callback()
+
     def __init__(self) -> None:
         super().__init__()
         self.running = True
@@ -46,6 +54,11 @@ class Config:
         self.motion_border_top = 0.3
         self.motion_border_bottom = 0.15
 
+        # Mouse position PID values
+        self.mouse_pid_p = 0.4
+        self.mouse_pid_i = 0
+        self.mouse_pid_d = 0.01
+
         # Distance percent of capture_size.
         self.click_distance_threshold_low_percent = 0.06
         self.click_distance_threshold_high_percent = self.click_distance_threshold_low_percent * 1.5
@@ -61,16 +74,19 @@ class Config:
         # A drag gesture is started when a click is held for at least this duration.
         self.drag_start_click_delay_ms = 1000
 
-        self.damping_factor = 2
         self.is_control_mouse_position = False
         self.is_control_click = False
         self.is_control_scroll = False
-        self.is_trigger_additional_click_for_double_click = False
+        self.is_all_control_disabled = False
+        self.is_trigger_additional_click_on_double_click = False
 
-        self.exit_shortcuts = ["ctrl+shift+alt+esc", "esc", "f4"]
+        self.is_stay_on_top = False
+
+        self.exit_shortcuts = ["ctrl+shift+alt+esc", "f4"]
         self.toggle_control_mouse_position_shortcuts = ["ctrl+shift+alt+p", "f8"]
         self.toggle_control_click_shortcuts = ["ctrl+shift+alt+c", "f9"]
         self.toggle_control_scroll_shortcuts = ["ctrl+shift+alt+s", "f10"]
+        self.toggle_all_control_disabled_shortcuts = ["ctrl+shift+alt+a", "f2"]
 
     def update_screen_size(self) -> None:
         self.screen_size = Vector(0, 0)

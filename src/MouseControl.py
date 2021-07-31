@@ -19,23 +19,23 @@ class MouseControl(LogHolder):
         # Proportional factor between 0 and 1.
         # Increase value if mouse is not moving fast enough to destination.
         # Reduce value if mouse is moving too fast or is jittering.
-        p = 0.4
+        p = self.config.mouse_pid_p
 
         # Integral factor.
         # Set to 0 if mouse is not moving smoothly. Then slowly increase value until ok.
-        i = 0
-        
+        i = self.config.mouse_pid_i
+
         # Derivative factor.
         # Set to 0 if mouse is not moving smoothly. Then slowly increase value until ok.
-        d = 0.01
-        
+        d = self.config.mouse_pid_d
+
         self.mouse_x_pid_control = PidControl(p, i, d)
         self.mouse_y_pid_control = PidControl(p, i, d)
         self.last_mouse_position_time_ms = get_time_ms()
         self.is_drag_started = False
 
     def on_new_mouse_position_detected(self, new_mouse_px: Vector) -> None:
-        if self.config.is_control_mouse_position:
+        if self.config.is_control_mouse_position and not self.config.is_all_control_disabled:
             delta_time_seconds = (get_time_ms() - self.last_mouse_position_time_ms) / 1000
             current_pos = Vector.from_tuple2(mouse.get_position())
             smooth_mouse_x = self.mouse_x_pid_control.get_next_value(current_pos.x, new_mouse_px.x, delta_time_seconds)
@@ -48,7 +48,7 @@ class MouseControl(LogHolder):
             self.log.info(f"{mouse_button.name} click, but ongoing drag")
             return
 
-        if self.config.is_control_click:
+        if self.config.is_control_click and not self.config.is_all_control_disabled:
             self.do_click(mouse_button)
             self.log.info(f"{mouse_button.name} click")
         else:
@@ -59,9 +59,9 @@ class MouseControl(LogHolder):
             self.log.info("double click, but ongoing drag")
             return
 
-        if self.config.is_control_click:
+        if self.config.is_control_click and not self.config.is_all_control_disabled:
             self.do_click(MouseButton.LEFT)
-            if self.config.is_trigger_additional_click_for_double_click:
+            if self.config.is_trigger_additional_click_on_double_click:
                 self.do_click(MouseButton.LEFT)
             self.log.info("double left click")
         else:
@@ -73,7 +73,7 @@ class MouseControl(LogHolder):
             return
 
         self.is_drag_started = True
-        if self.config.is_control_click:
+        if self.config.is_control_click and not self.config.is_all_control_disabled:
             mouse.press(button=mouse.LEFT)
             self.log.info("begin drag")
         else:
@@ -85,7 +85,7 @@ class MouseControl(LogHolder):
             return
 
         self.is_drag_started = False
-        if self.config.is_control_click:
+        if self.config.is_control_click and not self.config.is_all_control_disabled:
             mouse.release(mouse.LEFT)
             self.log.info("end drag")
         else:
@@ -99,7 +99,7 @@ class MouseControl(LogHolder):
             return
 
         try:
-            if self.config.is_control_scroll:
+            if self.config.is_control_scroll and not self.config.is_all_control_disabled:
                 if x != 0:
                     # horizontal scrolling not yet supported by mouse library
                     pass
