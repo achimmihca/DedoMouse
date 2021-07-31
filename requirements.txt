@@ -1,8 +1,10 @@
 mediapipe==0.8.5
 numpy==1.20.3
 opencv-python==4.5.2.52
-pynput==1.7.3
+mouse==0.7.1
+keyboard==0.13.5
 screeninfo==0.6.7
+jsonpickle==2.0.0
+pyside6==6.1.2
 pylint==2.9.3
 mypy==0.910
-jsonpickle==2.0.0

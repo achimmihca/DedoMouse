@@ -13,14 +13,21 @@ class Config:
         try:
             with open(file=Config.config_file_path, mode="r", encoding="utf-8") as file:
                 json_string = file.read()
-                config = from_json(json_string, Config)
-                config.running = True
+                loaded_config = from_json(json_string, Config)
+                loaded_config.running = True
+
+                # Merge with newly created config to ensure all fields are present
+                new_config = Config()
+                for k,v in new_config.__dict__.items():
+                    if not k in loaded_config.__dict__:
+                        loaded_config.__dict__[k] = v
+
                 Config.log.info(f"Loaded config from '{Config.config_file_path}'.")
-                return config
+                return loaded_config
         except Exception as e:
-            config = Config()
+            loaded_config = Config()
             Config.log.warning(f"Created new config. Could not load config from '{Config.config_file_path}': {str(e)}")
-            return config
+            return loaded_config
 
     def __init__(self) -> None:
         super().__init__()
@@ -58,11 +65,12 @@ class Config:
         self.is_control_mouse_position = False
         self.is_control_click = False
         self.is_control_scroll = False
+        self.is_trigger_additional_click_for_double_click = False
 
-        self.exit_keys = ["esc", "f4"]
-        self.toggle_control_mouse_position_keys = ["f9"]
-        self.toggle_control_click_keys = ["f10"]
-        self.toggle_control_scroll_keys = ["f8"]
+        self.exit_shortcuts = ["ctrl+shift+alt+esc", "esc", "f4"]
+        self.toggle_control_mouse_position_shortcuts = ["ctrl+shift+alt+p", "f8"]
+        self.toggle_control_click_shortcuts = ["ctrl+shift+alt+c", "f9"]
+        self.toggle_control_scroll_shortcuts = ["ctrl+shift+alt+s", "f10"]
 
     def update_screen_size(self) -> None:
         self.screen_size = Vector(0, 0)

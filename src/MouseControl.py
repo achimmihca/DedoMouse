@@ -1,7 +1,6 @@
 from __future__ import annotations
+import mouse # type: ignore
 from enum import Enum
-from typing import Any
-from pynput.mouse import Button, Controller  # type: ignore
 from Config import Config
 from LogHolder import LogHolder
 from PidControl import PidControl
@@ -12,7 +11,6 @@ class MouseControl(LogHolder):
     def __init__(self, config: Config):
         super().__init__()
         self.config = config
-        self.mouse_controller = Controller()
 
         # Configure PID values:
         # - start by setting i and d to zero and p to a small value.
@@ -39,23 +37,22 @@ class MouseControl(LogHolder):
     def on_new_mouse_position_detected(self, new_mouse_px: Vector) -> None:
         if self.config.is_control_mouse_position:
             delta_time_seconds = (get_time_ms() - self.last_mouse_position_time_ms) / 1000
-            current_pos = Vector.from_tuple2(self.mouse_controller.position)
+            current_pos = Vector.from_tuple2(mouse.get_position())
             smooth_mouse_x = self.mouse_x_pid_control.get_next_value(current_pos.x, new_mouse_px.x, delta_time_seconds)
             smooth_mouse_y = self.mouse_y_pid_control.get_next_value(current_pos.y, new_mouse_px.y, delta_time_seconds)
-            self.mouse_controller.position = (smooth_mouse_x, smooth_mouse_y)
+            mouse.move(smooth_mouse_x, smooth_mouse_y)
             self.last_mouse_position_time_ms = get_time_ms()
 
     def on_single_click_detected(self, mouse_button: MouseButton) -> None:
-        mouse_button_name = mouse_button.get_name()
         if self.is_drag_started:
-            self.log.info(f"{mouse_button_name} click, but ongoing drag")
+            self.log.info(f"{mouse_button.name} click, but ongoing drag")
             return
 
         if self.config.is_control_click:
-            self.mouse_controller.click(mouse_button.get_pynput_value(), 1)
-            self.log.info(f"{mouse_button_name} click")
+            self.do_click(mouse_button)
+            self.log.info(f"{mouse_button.name} click")
         else:
-            self.log.info(f"{mouse_button_name} click, but ignored")
+            self.log.info(f"{mouse_button.name} click, but ignored")
 
     def on_double_left_click_detected(self) -> None:
         if self.is_drag_started:
@@ -63,8 +60,9 @@ class MouseControl(LogHolder):
             return
 
         if self.config.is_control_click:
-            self.mouse_controller.click(Button.left, 1)
-            self.mouse_controller.click(Button.left, 1)
+            self.do_click(MouseButton.LEFT)
+            if self.config.is_trigger_additional_click_for_double_click:
+                self.do_click(MouseButton.LEFT)
             self.log.info("double left click")
         else:
             self.log.info("double left click, but ignored")
@@ -76,7 +74,7 @@ class MouseControl(LogHolder):
 
         self.is_drag_started = True
         if self.config.is_control_click:
-            self.mouse_controller.press(Button.left)
+            mouse.press(button=mouse.LEFT)
             self.log.info("begin drag")
         else:
             self.log.info("begin drag but ignored")
@@ -88,7 +86,7 @@ class MouseControl(LogHolder):
 
         self.is_drag_started = False
         if self.config.is_control_click:
-            self.mouse_controller.release(Button.left)
+            mouse.release(mouse.LEFT)
             self.log.info("end drag")
         else:
             self.log.info("end drag but ignored")
@@ -100,11 +98,26 @@ class MouseControl(LogHolder):
             self.log.info(f"scroll {scroll_direction}, but ongoing drag")
             return
 
-        if self.config.is_control_scroll:
-            self.mouse_controller.scroll(x, y)
-            self.log.info(f"scroll {scroll_direction}")
-        else:
-            self.log.info(f"scroll {scroll_direction}, but ignored")
+        try:
+            if self.config.is_control_scroll:
+                if x != 0:
+                    # horizontal scrolling not yet supported by mouse library
+                    pass
+                if y != 0:
+                    mouse.wheel(y)
+                self.log.info(f"scroll {scroll_direction}")
+            else:
+                self.log.info(f"scroll {scroll_direction}, but ignored")
+        except Exception as e:
+            self.log.error(f"scrolling failed (horizontal:{x}, vertical:{y}): {str(e)}")
+
+    def do_click(self, mouse_button: MouseButton) -> None:
+        if mouse_button == MouseButton.LEFT:
+            mouse.click(mouse.LEFT)
+        if mouse_button == MouseButton.RIGHT:
+            mouse.click(mouse.RIGHT)
+        if mouse_button == MouseButton.MIDDLE:
+            mouse.click(mouse.MIDDLE)
 
     def get_scroll_direction(self, x: int, y: int) -> str:
         if (x > 0 and y == 0):
@@ -121,21 +134,3 @@ class MouseButton(Enum):
     LEFT = 1
     RIGHT = 2
     MIDDLE = 3
-
-    def get_name(self) -> str:
-        if self == MouseButton.LEFT:
-            return "left"
-        if self == MouseButton.RIGHT:
-            return "right"
-        if self == MouseButton.MIDDLE:
-            return "middle"
-        raise Exception(f"Unkown mouse button {self}")
-
-    def get_pynput_value(self) -> Any:
-        if self == MouseButton.LEFT:
-            return Button.left
-        if self == MouseButton.RIGHT:
-            return Button.right
-        if self == MouseButton.MIDDLE:
-            return Button.middle
-        raise Exception(f"Unkown mouse button {self}")
