@@ -1,11 +1,13 @@
 import keyboard # type: ignore
 from Config import Config
+from Gui import MainGui
 from LogHolder import LogHolder
 
 class GlobalShortcutControl(LogHolder):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, main_gui: MainGui):
         super().__init__()
         self.config = config
+        self.main_gui = main_gui
  
     def start_listener(self) -> None:
         for shortcut in self.config.exit_shortcuts:
@@ -18,8 +20,8 @@ class GlobalShortcutControl(LogHolder):
             keyboard.add_hotkey(shortcut, self.on_toggle_control_scroll)
 
     def on_exit(self, shortcut: str) -> None:
-        self.log.info(f'Stopping main loop because of shortcut: {shortcut}')
-        self.config.running = False
+        self.log.info(f'Closing app because of shortcut: {shortcut}')
+        self.main_gui.close()
 
     def on_toggle_control_mouse_position(self) -> None:
         self.config.is_control_mouse_position = not self.config.is_control_mouse_position

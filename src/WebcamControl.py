@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable, List
 from cv2 import cv2 # type: ignore
 import mediapipe as mp # type: ignore
 from Config import Config
@@ -10,11 +10,14 @@ class WebcamControl(LogHolder):
         super().__init__()
         self.config = config
         self.gesture_regocnizer = gesture_regocnizer
+        self.fps = 0
+        self.frame_analyzed_callbacks: List[Callable] = []
 
     def start_video_capture(self) -> None:
         if not self.config.running:
             return
 
+        self.log.info("starting video capture")
         cap = cv2.VideoCapture(0)
 
         # configure video capture
@@ -29,14 +32,15 @@ class WebcamControl(LogHolder):
                 or self.config.capture_size.y != height):
             self.log.warning(f"Configured video size {self.config.capture_size.x}x{self.config.capture_size.y} does not match actual video size {width}x{height}")
 
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        if (self.config.capture_fps != fps):
-            self.log.warning(f"Configured frames per second {self.config.capture_fps} does not match actual frames per second {fps}")
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        if (self.config.capture_fps != self.fps):
+            self.log.warning(f"Configured frames per second {self.config.capture_fps} does not match actual frames per second {self.fps}")
 
-        self.log.info(f"Capturing video (width: {width}, height: {height}, fps: {fps})")
+        self.log.info(f"Capturing video (width: {width}, height: {height}, fps: {self.fps})")
 
         hands = mp.solutions.hands.Hands(max_num_hands=1)
-        
+
+        self.log.info("starting video capture analysis loop")
         while self.config.running:
             ret,frame = cap.read()
             
@@ -51,12 +55,16 @@ class WebcamControl(LogHolder):
 
             # draw overlay
             self.draw_overlay(frame)
-            
-            cv2.imshow("Dedo Mouse", frame)
+
+            for callback in self.frame_analyzed_callbacks:
+                callback(frame)
+
             cv2.waitKey(33)
 
         cap.release()
         cv2.destroyAllWindows()
+
+        self.log.info("video capture analysis loop finished")
 
     def draw_overlay(self, frame: Any) -> None:
         pass

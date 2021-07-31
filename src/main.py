@@ -1,5 +1,9 @@
 import logging
+import sys
+
+from PySide6.QtWidgets import QApplication
 from Config import Config
+from Gui import MainGui
 from Log import initLogging
 from MouseControl import MouseControl
 from WebcamControl import WebcamControl
@@ -14,18 +18,17 @@ logging.getLogger('root').info("=============================================")
 config = Config.load_from_file()
 config.update_screen_size()
 
-shortcut_control = GlobalShortcutControl(config)
-shortcut_control.start_listener()
-
 mouse_control = MouseControl(config)
 
 gesture_regocnizer = GestureRecognizer(config, mouse_control)
 
 webcam_control = WebcamControl(config, gesture_regocnizer)
-webcam_control.start_video_capture()
 
-config.save_to_file()
+app = QApplication(sys.argv)
+win = MainGui(config, webcam_control)
 
-logging.getLogger('root').info("=============================================")
-logging.getLogger('root').info("DedoMouse finished")
-logging.getLogger('root').info("=============================================")
+shortcut_control = GlobalShortcutControl(config, win)
+shortcut_control.start_listener()
+
+win.show()
+sys.exit(app.exec())
