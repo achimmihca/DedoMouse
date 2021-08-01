@@ -3,7 +3,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 from Config import Config
-from Gui import MainQtWindow
+from gui.MainWindow import MainWindow
 from Log import initLogging
 from MouseControl import MouseControl
 from WebcamControl import WebcamControl
@@ -25,9 +25,9 @@ gesture_regocnizer = GestureRecognizer(config, mouse_control)
 webcam_control = WebcamControl(config, gesture_regocnizer)
 
 app = QApplication(sys.argv)
-win = MainQtWindow(config, webcam_control)
+win = MainWindow(config, webcam_control)
 
-shortcut_control = GlobalShortcutControl(config, win)
+shortcut_control = GlobalShortcutControl(config, win.close)
 shortcut_control.start_listener()
 
 win.show()

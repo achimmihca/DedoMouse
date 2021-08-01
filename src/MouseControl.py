@@ -19,15 +19,15 @@ class MouseControl(LogHolder):
         # Proportional factor between 0 and 1.
         # Increase value if mouse is not moving fast enough to destination.
         # Reduce value if mouse is moving too fast or is jittering.
-        p = self.config.mouse_pid_p
+        p = self.config.mouse_position_pid_p
 
         # Integral factor.
         # Set to 0 if mouse is not moving smoothly. Then slowly increase value until ok.
-        i = self.config.mouse_pid_i
+        i = self.config.mouse_position_pid_i
 
         # Derivative factor.
         # Set to 0 if mouse is not moving smoothly. Then slowly increase value until ok.
-        d = self.config.mouse_pid_d
+        d = self.config.mouse_position_pid_d
 
         self.mouse_x_pid_control = PidControl(p, i, d)
         self.mouse_y_pid_control = PidControl(p, i, d)

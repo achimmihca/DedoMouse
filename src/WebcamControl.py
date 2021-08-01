@@ -4,6 +4,7 @@ import mediapipe as mp # type: ignore
 from Config import Config
 from GestureRecognizer import GestureRecognizer
 from LogHolder import LogHolder
+from Vector import Vector
 
 class WebcamControl(LogHolder):
     def __init__(self, config: Config, gesture_regocnizer: GestureRecognizer):
@@ -31,6 +32,7 @@ class WebcamControl(LogHolder):
         if (self.config.capture_size.x != width
                 or self.config.capture_size.y != height):
             self.log.warning(f"Configured video size {self.config.capture_size.x}x{self.config.capture_size.y} does not match actual video size {width}x{height}")
+            self.config.capture_size = Vector(width, height)
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         if (self.config.capture_fps != self.fps):

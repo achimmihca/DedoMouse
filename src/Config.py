@@ -55,9 +55,9 @@ class Config:
         self.motion_border_bottom = 0.15
 
         # Mouse position PID values
-        self.mouse_pid_p = 0.4
-        self.mouse_pid_i = 0
-        self.mouse_pid_d = 0.01
+        self.mouse_position_pid_p = 0.4
+        self.mouse_position_pid_i = 0
+        self.mouse_position_pid_d = 0.01
 
         # Distance percent of capture_size.
         self.click_distance_threshold_low_percent = 0.06
@@ -96,16 +96,10 @@ class Config:
         if len(monitors) <= self.monitor_index:
             Config.log.warning(f"no monitor at index {self.monitor_index}. Using monitor at index 0 instead.")
             self.monitor_index = 0
+            self.screen_offset = Vector(0, 0)
 
         selected_monitor = monitors[self.monitor_index]
         self.screen_size = Vector(selected_monitor.width, selected_monitor.height)
-
-        # Assume selected monitor is right of others monitor
-        if self.monitor_index > 0:
-            other_monitors = [m for m in monitors if m != selected_monitor]
-            for other_monitor in other_monitors:
-                new_offset_x = max(self.screen_offset.x, other_monitor.width)
-                self.screen_offset = Vector(new_offset_x, self.screen_offset.y)
 
         if self.screen_size.x <= 0 or self.screen_size.y <= 0:
             raise ConfigException("could not determine screen size")

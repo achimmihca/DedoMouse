@@ -1,13 +1,13 @@
+from typing import Callable
 import keyboard # type: ignore
 from Config import Config
-from Gui import MainQtWindow
 from LogHolder import LogHolder
 
 class GlobalShortcutControl(LogHolder):
-    def __init__(self, config: Config, main_gui: MainQtWindow):
+    def __init__(self, config: Config, on_close_callback: Callable):
         super().__init__()
         self.config = config
-        self.main_gui = main_gui
+        self.on_close_callback = on_close_callback
  
     def start_listener(self) -> None:
         for shortcut in self.config.exit_shortcuts:
@@ -23,7 +23,7 @@ class GlobalShortcutControl(LogHolder):
 
     def on_exit(self, shortcut: str) -> None:
         self.log.info(f'Closing app because of shortcut: {shortcut}')
-        self.main_gui.close()
+        self.on_close_callback()
 
     def on_toggle_control_mouse_position(self) -> None:
         self.config.is_control_mouse_position = not self.config.is_control_mouse_position
