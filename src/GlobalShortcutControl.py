@@ -1,10 +1,10 @@
 import keyboard # type: ignore
 from Config import Config
-from Gui import MainGui
+from Gui import MainQtWindow
 from LogHolder import LogHolder
 
 class GlobalShortcutControl(LogHolder):
-    def __init__(self, config: Config, main_gui: MainGui):
+    def __init__(self, config: Config, main_gui: MainQtWindow):
         super().__init__()
         self.config = config
         self.main_gui = main_gui

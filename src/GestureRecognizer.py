@@ -87,7 +87,7 @@ class GestureRecognizer(LogHolder):
         mouse_y = int(self.config.screen_offset.y + self.config.screen_size.y * pos_percent_y)
 
         screen_pos_px = screen_pos_percent.scale(self.config.capture_size).add(Vector(10, 10)).toIntVector()
-        pos_text = f"{pos_percent_x * 100:.0f} ({mouse_x}) | {pos_percent_y * 100:.0f} ({mouse_y})"
+        pos_text = f"{pos_percent_x * 100:.0f}% ({mouse_x}px) | {pos_percent_y * 100:.0f}% ({mouse_y}px)"
         cv2.putText(frame, pos_text, screen_pos_px.toTuple2(), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
         
         return Vector(mouse_x, mouse_y, 0)
