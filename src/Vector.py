@@ -12,7 +12,7 @@ class Vector:
     Spherical coordinates in the r, theta, phi space (spherical class method).
     Cylindrical coordinates in the r, theta, z space (cylindrical class method).
     """
-    def __init__(self, x:float, y:float, z:float=0) -> None:
+    def __init__(self, x: float, y: float, z: float = 0) -> None:
         self.x = x
         self.y = y
         self.z = z
@@ -111,7 +111,7 @@ class Vector:
             return Vector(round(self.x, n), round(self.y, n), round(self.z, n))
         return Vector(round(self.x), round(self.y), round(self.z))
 
-    def toIntVector(self) -> Vector:
+    def to_int_vector(self) -> Vector:
         """ Cast the values of this Vector to integers (component-wise). """
         return Vector(int(self.x), int(self.y), int(self.z))
 
@@ -123,7 +123,7 @@ class Vector:
         """ Returns a new Vector that is this Vector minus the other Vector (component-wise). """
         return Vector(self.x - vec.x, self.y - vec.y, self.z - vec.z)
 
-    def subtractScalar(self, f: float) -> Vector:
+    def subtract_scalar(self, f: float) -> Vector:
         """ Returns a new Vector that is this Vector minus the scalar (component-wise). """
         return Vector(self.x - f, self.y - f, self.z - f)
 
@@ -131,7 +131,7 @@ class Vector:
         """ Returns a new Vector that is this Vector plus the other Vector (component-wise). """
         return Vector(pt.x + self.x, pt.y + self.y, pt.z + self.z)
 
-    def addScalar(self, f: float) -> Vector:
+    def add_scalar(self, f: float) -> Vector:
         """ Returns a new Vector that is this Vector plus the scalar (component-wise). """
         return Vector(self.x + f, self.y + f, self.z + f)
 
@@ -139,7 +139,7 @@ class Vector:
         """ Returns a new Vector from component-wise multiplication. """
         return Vector(self.x * vec.x, self.y * vec.y, self.z * vec.z)
 
-    def scaleByScalar(self, factor: float) -> Vector:
+    def scale_by_scalar(self, factor: float) -> Vector:
         """Returns a new Vector from component-wise multiplication with a float"""
         return Vector(self.x * factor, self.y * factor, self.z * factor)
 
@@ -149,15 +149,15 @@ class Vector:
             + self.y * self.y
             + self.z * self.z )
 
-    def dot(self, vec: Vector, thetaInDegrees:float=None) -> float:
+    def dot(self, vec: Vector, theta_in_degrees: float = None) -> float:
         """ Returns a new Vector that is the dot product of two vectors.
         If theta is given then the dot product is computed as
         v1*v1 = |v1||v2|cos(theta). Argument theta
         is measured in degrees.
         """
-        if thetaInDegrees is not None:
+        if theta_in_degrees is not None:
             return (self.magnitude() * vec.magnitude() *
-                    math.degrees(math.cos(thetaInDegrees)))
+                    math.degrees(math.cos(theta_in_degrees)))
         return (reduce(lambda x, y: x + y,
                 [x * vec.to_list()[i] for i, x in enumerate(self.to_list())]))
 
@@ -207,7 +207,7 @@ class Vector:
             return True
         return False
 
-    def rotate(self, angleInRadians:float, axis:Tuple[float,float,float]=(0, 0, 1)) -> Vector:
+    def rotate(self, angle_in_radians: float, axis: Tuple[float, float, float]=(0, 0, 1)) -> Vector:
         """ Returns the rotated vector. Assumes angle is in radians. """
         if not all(isinstance(a, int) for a in axis):
             raise ValueError
@@ -215,25 +215,25 @@ class Vector:
 
         # Z axis rotation
         if(axis[2]):
-            x = (self.x * math.cos(angleInRadians) - self.y * math.sin(angleInRadians))
-            y = (self.x * math.sin(angleInRadians) + self.y * math.cos(angleInRadians))
+            x = (self.x * math.cos(angle_in_radians) - self.y * math.sin(angle_in_radians))
+            y = (self.x * math.sin(angle_in_radians) + self.y * math.cos(angle_in_radians))
 
         # Y axis rotation
         if(axis[1]):
-            x = self.x * math.cos(angleInRadians) + self.z * math.sin(angleInRadians)
-            z = -self.x * math.sin(angleInRadians) + self.z * math.cos(angleInRadians)
+            x = self.x * math.cos(angle_in_radians) + self.z * math.sin(angle_in_radians)
+            z = -self.x * math.sin(angle_in_radians) + self.z * math.cos(angle_in_radians)
 
         # X axis rotation
         if(axis[0]):
-            y = self.y * math.cos(angleInRadians) - self.z * math.sin(angleInRadians)
-            z = self.y * math.sin(angleInRadians) + self.z * math.cos(angleInRadians)
+            y = self.y * math.cos(angle_in_radians) - self.z * math.sin(angle_in_radians)
+            z = self.y * math.sin(angle_in_radians) + self.z * math.cos(angle_in_radians)
 
         return Vector(x, y, z)
 
-    def toTuple2(self) -> Tuple[float, float]:
+    def to_tuple_2(self) -> Tuple[float, float]:
         """ Returns a tuple in the form (x, y) """
         return (self.x, self.y)
 
-    def toTuple3(self) -> Tuple[float, float, float]:
+    def to_tuple_3(self) -> Tuple[float, float, float]:
         """ Returns a tuple in the form (x, y, z) """
         return (self.x, self.y, self.z)

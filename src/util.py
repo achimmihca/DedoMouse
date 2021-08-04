@@ -23,7 +23,7 @@ def from_json(json_string: str, _: Type[T]) -> T:
 #############################################
 # List Utils
 def get_elements_except(all_elements: List[T], elements_to_exclude: List[T]) -> List[T]:
-    return [x for x in all_elements if not x in elements_to_exclude]
+    return [x for x in all_elements if x not in elements_to_exclude]
 
 def get_min_element(elements: List[T], element_to_value: Callable[[T], float]) -> T:
     if not elements:

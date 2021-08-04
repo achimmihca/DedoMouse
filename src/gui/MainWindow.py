@@ -45,9 +45,9 @@ class MainWindow(QMainWindow, LogHolder):
         self.video_capture_thread.start()
 
     def setup_status_bar(self) -> None:
-        capture_size_label = QLabel(f"Video size: {self.config.capture_size.x}x{self.config.capture_size.y}")
+        capture_size_label = QLabel(f"Video size: {self.config.capture_size.value.x}x{self.config.capture_size.value.y}")
         self.statusBar().addWidget(capture_size_label)
-        monitor_size_label = QLabel(f"Monitor size: {self.config.screen_size.x}x{self.config.screen_size.y}")
+        monitor_size_label = QLabel(f"Monitor size: {self.config.screen_size.value.x}x{self.config.screen_size.value.y}")
         self.statusBar().addWidget(monitor_size_label)
 
     def closeEvent(self, event: Any) -> None:
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow, LogHolder):
         self.config.save_to_file()
 
         # Stop main loop of video capture thread
-        self.config.running = False
+        self.config.running.value = False
         self.log.info("waiting for video capture thread to terminate")
         self.video_capture_thread.wait()
         # Close Qt application
@@ -66,11 +66,13 @@ class MainWindow(QMainWindow, LogHolder):
 
     def update_stay_on_top(self) -> None:
         last_window_flags = self.windowFlags()
+        # noinspection PyUnusedLocal
         new_window_flags = self.windowFlags()
         if self.config.is_stay_on_top:
             new_window_flags = last_window_flags | Qt.WindowStaysOnTopHint
         else:
-            new_window_flags = last_window_flags & ~Qt.WindowStaysOnTopHint
+            new_window_flags = last_window_flags & ~Qt.WindowStaysOnTopHint # type: ignore
+
         if new_window_flags != last_window_flags:
             self.setWindowFlags(new_window_flags)
             self.show()

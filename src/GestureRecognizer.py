@@ -45,7 +45,7 @@ class GestureRecognizer(LogHolder):
 
         # find landmark positions
         first_hand_landmarks = multi_hand_landmarks[0]
-        hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.config.capture_size)
+        hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.config.capture_size.value)
 
         wrist_position = hand_finger_positions.wrist_position
         thumb_tip_position = hand_finger_positions.thumb_finger_positions[-1]
@@ -53,14 +53,14 @@ class GestureRecognizer(LogHolder):
         middle_finger_position = hand_finger_positions.middle_finger_positions[-1]
 
         # draw landmark positions
-        cv2.circle(frame, wrist_position.px.toTuple2(), 5, (255, 0, 0), -1)
-        cv2.circle(frame, thumb_tip_position.px.toTuple2(), 5, (0, 255, 255), -1)
-        cv2.circle(frame, index_finger_position.px.toTuple2(), 5, (255, 255, 0), -1)
-        cv2.circle(frame, middle_finger_position.px.toTuple2(), 5, (0, 255, 0), -1)
+        cv2.circle(frame, wrist_position.px.to_tuple_2(), 5, (255, 0, 0), -1)
+        cv2.circle(frame, thumb_tip_position.px.to_tuple_2(), 5, (0, 255, 255), -1)
+        cv2.circle(frame, index_finger_position.px.to_tuple_2(), 5, (255, 255, 0), -1)
+        cv2.circle(frame, middle_finger_position.px.to_tuple_2(), 5, (0, 255, 0), -1)
 
         # draw click threshold
-        cv2.circle(frame, thumb_tip_position.px.toTuple2(), int(self.config.click_distance_threshold_low_percent * self.config.capture_size.x / 2), (0, 255, 0), 2)
-        cv2.circle(frame, thumb_tip_position.px.toTuple2(), int(self.config.click_distance_threshold_high_percent * self.config.capture_size.x / 2), (0, 255, 0), 2)
+        cv2.circle(frame, thumb_tip_position.px.to_tuple_2(), int(self.config.click_distance_threshold_low_percent.value * self.config.capture_size.value.x / 2), (0, 255, 0), 2)
+        cv2.circle(frame, thumb_tip_position.px.to_tuple_2(), int(self.config.click_distance_threshold_high_percent.value * self.config.capture_size.value.x / 2), (0, 255, 0), 2)
 
         # detect mouse position
         mouse_pos_px = self.get_mouse_position_px(wrist_position.percent, frame)
@@ -79,16 +79,16 @@ class GestureRecognizer(LogHolder):
         self.detect_scoll(current_time_ms, hand_finger_positions)
 
     def get_mouse_position_px(self, screen_pos_percent: Vector, frame: Any) -> Vector:
-        pos_percent_x = (screen_pos_percent.x - self.config.motion_border_left) / (1 - self.config.motion_border_left - self.config.motion_border_right)
+        pos_percent_x = (screen_pos_percent.x - self.config.motion_border_left.value) / (1 - self.config.motion_border_left.value - self.config.motion_border_right.value)
         pos_percent_x = max(0, min(1, pos_percent_x))
-        pos_percent_y = (screen_pos_percent.y - self.config.motion_border_top) / (1 - self.config.motion_border_top - self.config.motion_border_bottom)
+        pos_percent_y = (screen_pos_percent.y - self.config.motion_border_top.value) / (1 - self.config.motion_border_top.value - self.config.motion_border_bottom.value)
         pos_percent_y = max(0, min(1, pos_percent_y))
-        mouse_x = int(self.config.screen_offset.x + self.config.screen_size.x * pos_percent_x)
-        mouse_y = int(self.config.screen_offset.y + self.config.screen_size.y * pos_percent_y)
+        mouse_x = int(self.config.screen_offset.value.x + self.config.screen_size.value.x * pos_percent_x)
+        mouse_y = int(self.config.screen_offset.value.y + self.config.screen_size.value.y * pos_percent_y)
 
-        screen_pos_px = screen_pos_percent.scale(self.config.capture_size).add(Vector(10, 10)).toIntVector()
+        screen_pos_px = screen_pos_percent.scale(self.config.capture_size.value).add(Vector(10, 10)).to_int_vector()
         pos_text = f"{pos_percent_x * 100:.0f}% ({mouse_x}px) | {pos_percent_y * 100:.0f}% ({mouse_y}px)"
-        cv2.putText(frame, pos_text, screen_pos_px.toTuple2(), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
+        cv2.putText(frame, pos_text, screen_pos_px.to_tuple_2(), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
         
         return Vector(mouse_x, mouse_y, 0)
 
@@ -115,8 +115,8 @@ class GestureRecognizer(LogHolder):
             is_initial_scroll = True
 
         if is_thumb_up or is_thumb_down:
-            is_continued_scroll_mode = self.start_scroll_time_ms + self.config.continued_scroll_mode_delay_ms <= current_time_ms
-            is_continued_scroll_needed = self.last_scroll_time_ms + self.config.continued_scroll_pause_ms <= current_time_ms
+            is_continued_scroll_mode = self.start_scroll_time_ms + self.config.continued_scroll_mode_delay_ms.value <= current_time_ms
+            is_continued_scroll_needed = self.last_scroll_time_ms + self.config.continued_scroll_pause_ms.value <= current_time_ms
             is_scroll_needed_now = is_initial_scroll or (is_continued_scroll_mode and is_continued_scroll_needed)
             if (is_scroll_needed_now):
                 if (is_thumb_up):
@@ -135,7 +135,7 @@ class GestureRecognizer(LogHolder):
         # drag end gesture: releasing click gesture (index not near thumb anymore)
         distance_thumb_index_percent = Vector.distance(thumb_pos.percent, index_finger_pos.percent)
 
-        if (distance_thumb_index_percent > self.config.click_distance_threshold_high_percent):
+        if (distance_thumb_index_percent > self.config.click_distance_threshold_high_percent.value):
             self.is_potential_drag_gesture = False
 
         if (self.is_drag_started
@@ -145,7 +145,7 @@ class GestureRecognizer(LogHolder):
 
         if (not self.is_drag_started
                 and self.is_potential_drag_gesture
-                and self.left_click_start_time_ms + self.config.drag_start_click_delay_ms <= current_time_ms):
+                and self.left_click_start_time_ms + self.config.drag_start_click_delay_ms.value <= current_time_ms):
             self.on_begin_drag()
 
     def detect_left_click(self,
@@ -161,7 +161,7 @@ class GestureRecognizer(LogHolder):
         if (not self.allow_left_click):
             return
 
-        if (self.last_left_click_time_ms + self.config.single_click_pause_ms <= current_time_ms):
+        if (self.last_left_click_time_ms + self.config.single_click_pause_ms.value <= current_time_ms):
             self.left_click_count = 0
 
         middle_finger_tip = hand_finger_positions.middle_finger_positions[-1]
@@ -170,10 +170,10 @@ class GestureRecognizer(LogHolder):
         if (self.is_near_target([index_finger_tip], thumb_finger_tip)
                 and self.is_faraway_target([middle_finger_tip, ring_finger_tip, pinky_finger_tip], thumb_finger_tip)):
             if (self.left_click_count == 0
-                    and self.last_left_click_time_ms + self.config.single_click_pause_ms <= current_time_ms):
+                    and self.last_left_click_time_ms + self.config.single_click_pause_ms.value <= current_time_ms):
                 self.on_left_click(current_time_ms)
             elif (self.left_click_count == 1
-                    and current_time_ms < self.last_left_click_time_ms + self.config.double_click_max_pause_ms):
+                    and current_time_ms < self.last_left_click_time_ms + self.config.double_click_max_pause_ms.value):
                 self.on_double_left_click(current_time_ms)
     
     def is_faraway_target(self,
@@ -181,7 +181,7 @@ class GestureRecognizer(LogHolder):
             target_position: FingerPosition) -> bool:
         finger_target_distances_percent = [Vector.distance(finger_position.percent, target_position.percent) for finger_position in finger_positions]
 
-        all_fingers_not_near_target = all(distance_percent > self.config.click_distance_threshold_high_percent
+        all_fingers_not_near_target = all(distance_percent > self.config.click_distance_threshold_high_percent.value
             for distance_percent in finger_target_distances_percent)
 
         return all_fingers_not_near_target
@@ -191,7 +191,7 @@ class GestureRecognizer(LogHolder):
             target_position: FingerPosition) -> bool:
         finger_target_distances_percent = [Vector.distance(finger_position.percent, target_position.percent) for finger_position in finger_positions]
 
-        all_fingers_near_target = all(distance_percent < self.config.click_distance_threshold_low_percent
+        all_fingers_near_target = all(distance_percent < self.config.click_distance_threshold_low_percent.value
             for distance_percent in finger_target_distances_percent)
 
         return all_fingers_near_target
@@ -214,7 +214,7 @@ class GestureRecognizer(LogHolder):
         pinky_finger_tip = hand_finger_positions.pinky_finger_positions[-1]
         if (self.is_near_target([middle_finger_tip, ring_finger_tip], thumb_finger_tip)
                 and self.is_faraway_target([index_finger_tip, pinky_finger_tip], thumb_finger_tip)):
-            if (self.last_right_click_time_ms + self.config.single_click_pause_ms <= current_time_ms):
+            if (self.last_right_click_time_ms + self.config.single_click_pause_ms.value <= current_time_ms):
                 self.on_right_click(current_time_ms)
 
     def detect_middle_click(self,
@@ -235,7 +235,7 @@ class GestureRecognizer(LogHolder):
         middle_finger_tip = hand_finger_positions.middle_finger_positions[-1]
         if (self.is_near_target([ring_finger_tip, pinky_finger_tip], thumb_finger_tip)
                 and self.is_faraway_target([index_finger_tip, middle_finger_tip], thumb_finger_tip)):
-            if (self.last_middle_click_time_ms + self.config.single_click_pause_ms <= current_time_ms):
+            if (self.last_middle_click_time_ms + self.config.single_click_pause_ms.value <= current_time_ms):
                 self.on_middle_click(current_time_ms)
 
     def is_thumb_up(self,
@@ -306,7 +306,7 @@ class GestureRecognizer(LogHolder):
         return all_columns_vertically_aligned
 
     def is_finger_straight_horizontally(self, finger_positions: List[FingerPosition]) -> bool:
-        # strechted finger joints: 0-1-2
+        # stretched finger joints: 0-1-2
         # curved finger joints: 0-2-1
         if (all_increasing(finger_positions, lambda finger_position: finger_position.px.x)
                 or all_decreasing(finger_positions, lambda finger_position: finger_position.px.x)):
@@ -384,7 +384,8 @@ class HandFingerPositions:
             self.ring_finger_positions,
             self.pinky_finger_positions]))
 
-        self.index_to_finger_position = {0: self.wrist_position,
+        self.index_to_finger_position = {
+            0: self.wrist_position,
             1: self.thumb_finger_positions[0],
             2: self.thumb_finger_positions[1],
             3: self.thumb_finger_positions[2],
@@ -425,7 +426,7 @@ class HandFingerPositions:
 class FingerPosition:
     def __init__(self, landmark: Any, capture_size: Vector) -> None:
         self.percent = Vector.from_xy(landmark)
-        self.px = self.percent.scale(capture_size).toIntVector()
+        self.px = self.percent.scale(capture_size).to_int_vector()
 
 class ThumbGestureDirection(Enum):
     UP = 1

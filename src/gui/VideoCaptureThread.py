@@ -27,8 +27,8 @@ class VideoCaptureThread(QThread):
         try:
             label_width = self.video_display_label.width()
             label_height = self.video_display_label.height()
-            scale_x = label_width / self.config.capture_size.x
-            scale_y = label_height / self.config.capture_size.y
+            scale_x = label_width / self.config.capture_size.value.x
+            scale_y = label_height / self.config.capture_size.value.y
             scale = min(scale_x, scale_y)
             frame = cv2.resize(frame, None, fx=scale, fy=scale)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

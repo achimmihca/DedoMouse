@@ -7,11 +7,11 @@ from rx.subject.subject import Subject
 T = TypeVar('T')
 
 class ReactiveProperty(Observable[T]):
-    def __init__(self, initialValue: T = None) -> None:
+    def __init__(self, initial_value: T) -> None:
         super().__init__()
         self.subject = Subject()
         self.subject.pipe()
-        self.value = initialValue
+        self.value = initial_value
     
     def subscribe(self, # pylint: disable=arguments-differ
             observer: Optional[Union[typing.Observer, typing.OnNext]] = None,
@@ -23,14 +23,14 @@ class ReactiveProperty(Observable[T]):
             ) -> typing.Disposable:
         return self.subject.subscribe(observer=observer, on_error=on_error, on_completed=on_completed, on_next=on_next, scheduler=scheduler)
 
-    def subscribeAndRun(self, # pylint: disable=arguments-differ
-            observer: Optional[Union[typing.Observer, typing.OnNext]] = None,
-            on_error: Optional[typing.OnError] = None,
-            on_completed: Optional[typing.OnCompleted] = None,
-            on_next: Optional[typing.OnNext] = None,
-            *,
-            scheduler: Optional[typing.Scheduler] = None,
-            ) -> typing.Disposable:
+    def subscribe_and_run(self,  # pylint: disable=arguments-differ
+                          observer: Optional[Union[typing.Observer, typing.OnNext]] = None,
+                          on_error: Optional[typing.OnError] = None,
+                          on_completed: Optional[typing.OnCompleted] = None,
+                          on_next: Optional[typing.OnNext] = None,
+                          *,
+                          scheduler: Optional[typing.Scheduler] = None,
+                          ) -> typing.Disposable:
         res = self.subscribe(observer=observer, on_error=on_error, on_completed=on_completed, on_next=on_next, scheduler=scheduler)
         if self.value:
             if on_next:

@@ -19,11 +19,11 @@ class ConfigVariableCheckBox(QCheckBox, LogHolder):
         Config.config_change_callbacks.append(self.update_checkbox_by_config_value)
 
     def update_checkbox_by_config_value(self) -> None:
-        varvalue = self.config.__dict__[self.varname]
+        varvalue = self.config.__dict__[self.varname].value
         if (varvalue != self.isChecked()):
             self.setChecked(varvalue)
 
     def update_config_value_by_checkbox(self) -> None:
-        self.config.__dict__[self.varname] = self.isChecked()
+        self.config.__dict__[self.varname].value = self.isChecked()
         Config.fire_config_changed_event()
-        self.log.info(f"set {self.varname} to {self.config.__dict__[self.varname]}")
+        self.log.info(f"set {self.varname} to {self.config.__dict__[self.varname].value}")
