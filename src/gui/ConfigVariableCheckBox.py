@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QCheckBox
 
+from typing import Any
 from Config import Config
 from LogHolder import LogHolder
 
@@ -11,19 +12,15 @@ class ConfigVariableCheckBox(QCheckBox, LogHolder):
         self.varname = varname.split("=")[0].replace("self.config.", "")
         self.label_name = label_name
 
-        # set initial checked state from config
-        self.update_checkbox_by_config_value()
         # update config on checkbox state
         self.stateChanged.connect(self.update_config_value_by_checkbox)
         # update checkbox on config change
-        Config.config_change_callbacks.append(self.update_checkbox_by_config_value)
+        self.config.__dict__[self.varname].subscribe_and_run(self.update_checkbox_by_config_value)
 
-    def update_checkbox_by_config_value(self) -> None:
-        varvalue = self.config.__dict__[self.varname].value
-        if (varvalue != self.isChecked()):
-            self.setChecked(varvalue)
+    def update_checkbox_by_config_value(self, new_value: Any) -> None:
+        if (new_value != self.isChecked()):
+            self.setChecked(new_value)
 
     def update_config_value_by_checkbox(self) -> None:
-        self.config.__dict__[self.varname].value = self.isChecked()
-        Config.fire_config_changed_event()
-        self.log.info(f"set {self.varname} to {self.config.__dict__[self.varname].value}")
+        if (self.config.__dict__[self.varname].value != self.isChecked()):
+            self.config.__dict__[self.varname].value = self.isChecked()

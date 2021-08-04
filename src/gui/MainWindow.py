@@ -37,8 +37,7 @@ class MainWindow(QMainWindow, LogHolder):
 
         self.setup_status_bar()
 
-        self.update_stay_on_top()
-        Config.config_change_callbacks.append(self.update_stay_on_top)
+        self.config.is_stay_on_top.subscribe_and_run(self.update_stay_on_top)
 
     def setup_video_capture(self) -> None:
         self.video_capture_thread = VideoCaptureThread(self.config, self.webcam_control, self.main_widget.image_label)
@@ -64,11 +63,11 @@ class MainWindow(QMainWindow, LogHolder):
 
         self.log.info("DedoMouse finished")
 
-    def update_stay_on_top(self) -> None:
+    def update_stay_on_top(self, new_stay_on_top: bool) -> None:
         last_window_flags = self.windowFlags()
         # noinspection PyUnusedLocal
         new_window_flags = self.windowFlags()
-        if self.config.is_stay_on_top:
+        if new_stay_on_top:
             new_window_flags = last_window_flags | Qt.WindowStaysOnTopHint
         else:
             new_window_flags = last_window_flags & ~Qt.WindowStaysOnTopHint # type: ignore

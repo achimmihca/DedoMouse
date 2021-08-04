@@ -11,8 +11,9 @@ class ReactiveProperty(Observable[T]):
         super().__init__()
         self.subject = Subject()
         self.subject.pipe()
+        self.last_value = initial_value
         self.value = initial_value
-    
+
     def subscribe(self, # pylint: disable=arguments-differ
             observer: Optional[Union[typing.Observer, typing.OnNext]] = None,
             on_error: Optional[typing.OnError] = None,
@@ -32,14 +33,14 @@ class ReactiveProperty(Observable[T]):
                           scheduler: Optional[typing.Scheduler] = None,
                           ) -> typing.Disposable:
         res = self.subscribe(observer=observer, on_error=on_error, on_completed=on_completed, on_next=on_next, scheduler=scheduler)
-        if self.value:
-            if on_next:
-                on_next(self.value)
-            elif observer and callable(observer):
-                observer(self.value)
+        if on_next:
+            on_next(self.value)
+        elif observer and callable(observer):
+            observer(self.value)
         return res
 
     def __setattr__(self, name: str, value: Any) -> None:
         super().__setattr__(name, value)
-        if (name == "value" and self.value):
+        if (name == "value" and self.value != self.last_value):
             self.subject.on_next(value)
+            self.last_value = self.value

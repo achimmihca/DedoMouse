@@ -19,8 +19,8 @@ logging.getLogger('root').info("=============================================")
 
 ConfigJsonHandler.handles(Config)
 config = Config.load_from_file()
-
 config.update_screen_size()
+config.enable_logging_on_value_change()
 
 mouse_control = MouseControl(config)
 

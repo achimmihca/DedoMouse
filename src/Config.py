@@ -1,6 +1,5 @@
 from __future__ import annotations
 import logging
-from typing import Callable, List
 from screeninfo import get_monitors
 from Vector import Vector
 from util import from_json, to_json
@@ -10,7 +9,6 @@ from ReactiveProperty import ReactiveProperty
 class Config:
     config_file_path = "config.json"
     log = logging.getLogger("Config")
-    config_change_callbacks: List[Callable] = []
 
     @staticmethod
     def load_from_file() -> Config:
@@ -26,11 +24,6 @@ class Config:
             Config.log.error(f"Created new config. Could not load config from '{Config.config_file_path}'")
             Config.log.exception(e)
             return loaded_config
-
-    @staticmethod
-    def fire_config_changed_event() -> None:
-        for callback in Config.config_change_callbacks:
-            callback()
 
     def __init__(self) -> None:
         self.running = ReactiveProperty(True)
@@ -81,6 +74,11 @@ class Config:
         self.toggle_control_click_shortcuts = ReactiveProperty(["ctrl+shift+alt+c", "f9"])
         self.toggle_control_scroll_shortcuts = ReactiveProperty(["ctrl+shift+alt+s", "f10"])
         self.toggle_all_control_disabled_shortcuts = ReactiveProperty(["ctrl+shift+alt+a", "f2"])
+
+    def enable_logging_on_value_change(self) -> None:
+        for k, v in self.__dict__.items():
+            if (isinstance(v, ReactiveProperty)):
+                v.subscribe(lambda new_value: self.log.info(f"config changed: {k}: {new_value}"))
 
     def update_screen_size(self) -> None:
         self.screen_size.value = Vector(0, 0)
