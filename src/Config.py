@@ -1,8 +1,7 @@
 from __future__ import annotations
 import logging
-from os import stat
-from typing import Callable, List
-from screeninfo import get_monitors # type: ignore
+from typing import Any, Callable, List
+from screeninfo import get_monitors
 from Vector import Vector
 from util import from_json, to_json
 
@@ -18,18 +17,12 @@ class Config:
                 json_string = file.read()
                 loaded_config = from_json(json_string, Config)
                 loaded_config.running = True
-
-                # Merge with newly created config to ensure all fields are present
-                new_config = Config()
-                for k,v in new_config.__dict__.items():
-                    if not k in loaded_config.__dict__:
-                        loaded_config.__dict__[k] = v
-
                 Config.log.info(f"Loaded config from '{Config.config_file_path}'.")
                 return loaded_config
         except Exception as e:
             loaded_config = Config()
-            Config.log.warning(f"Created new config. Could not load config from '{Config.config_file_path}': {str(e)}")
+            Config.log.error(f"Created new config. Could not load config from '{Config.config_file_path}'")
+            Config.log.exception(e)
             return loaded_config
 
     @staticmethod
@@ -38,7 +31,6 @@ class Config:
             callback()
 
     def __init__(self) -> None:
-        super().__init__()
         self.running = True
         self.use_webcam = True
         

@@ -1,8 +1,10 @@
+from __future__ import annotations
 import logging
 import sys
 
 from PySide6.QtWidgets import QApplication
 from Config import Config
+from ConfigJsonHandler import ConfigJsonHandler
 from gui.MainWindow import MainWindow
 from Log import initLogging
 from MouseControl import MouseControl
@@ -15,7 +17,9 @@ logging.getLogger('root').info("=============================================")
 logging.getLogger('root').info("DedoMouse started")
 logging.getLogger('root').info("=============================================")
 
+ConfigJsonHandler.handles(Config)
 config = Config.load_from_file()
+
 config.update_screen_size()
 
 mouse_control = MouseControl(config)
