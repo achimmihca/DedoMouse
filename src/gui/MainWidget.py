@@ -6,7 +6,7 @@ from common.LogHolder import LogHolder
 from .ConfigVariableCheckBox import ConfigVariableCheckBox
 from .EnabledMouseActionsControl import EnabledMouseActionsControl
 from .MonitorConfigControl import MonitorConfigControl
-from .qtutils import new_group
+from .qt_util import new_group
 
 class MainWidget(QWidget, LogHolder):
     def __init__(self, config: Config, close_callback: Callable) -> None:

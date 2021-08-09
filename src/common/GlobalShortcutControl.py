@@ -27,15 +27,12 @@ class GlobalShortcutControl(LogHolder):
 
     def on_toggle_control_mouse_position(self) -> None:
         self.config.is_control_mouse_position.value = not self.config.is_control_mouse_position.value
-        self.log.info(f"Control mouse position: {self.config.is_control_mouse_position.value}")
 
     def on_toggle_control_click(self) -> None:
         self.config.is_control_click.value = not self.config.is_control_click.value
-        self.log.info(f"Control click: {self.config.is_control_click.value}")
 
     def on_toggle_control_scroll(self) -> None:
         self.config.is_control_scroll.value = not self.config.is_control_scroll.value
-        self.log.info(f"Control scroll: {self.config.is_control_scroll.value}")
 
     def on_toggle_all_control_disabled(self) -> None:
         self.config.is_all_control_disabled.value = not self.config.is_all_control_disabled.value

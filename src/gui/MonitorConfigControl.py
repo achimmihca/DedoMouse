@@ -4,7 +4,7 @@ from screeninfo import get_monitors
 from common.Config import Config
 from common.LogHolder import LogHolder
 from common.Vector import Vector
-from .qtutils import new_label
+from .qt_util import new_label
 
 class MonitorConfigControl(QWidget, LogHolder):
     def __init__(self, config: Config) -> None:
@@ -38,15 +38,12 @@ class MonitorConfigControl(QWidget, LogHolder):
 
         # update controls on config change
         self.config.screen_offset.subscribe_and_run(self.update_controls_of_screen_offset)
-        self.config.monitor_index.subscribe_and_run(self.update_controls_of_monitor_index)
+        self.config.monitor_index.subscribe_and_run(lambda new_value: self.monitor_combo.setCurrentIndex(new_value))
 
         # update config on control change
         self.monitor_offset_x_spinner.valueChanged.connect(self.update_config_by_screen_offset)
         self.monitor_offset_y_spinner.valueChanged.connect(self.update_config_by_screen_offset)
         self.monitor_combo.currentIndexChanged.connect(self.update_config_by_monitor_index)
-
-    def update_controls_of_monitor_index(self, new_monitor_index: int) -> None:
-        self.monitor_combo.setCurrentIndex(new_monitor_index)
 
     def update_controls_of_screen_offset(self, new_screen_offset: Vector) -> None:
         self.monitor_offset_x_spinner.setValue(int(new_screen_offset.x))
@@ -57,6 +54,7 @@ class MonitorConfigControl(QWidget, LogHolder):
 
     def update_config_by_monitor_index(self) -> None:
         self.config.monitor_index.value = self.monitor_combo.currentIndex()
+        self.config.update_screen_size()
 
 class MonitorOffsetSpinBox(QSpinBox):
     def __init__(self) -> None:

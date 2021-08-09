@@ -1,4 +1,6 @@
 import logging
+import sys
+
 
 def init_logging() -> None:
     log = logging.getLogger("initLoggingLogger")
@@ -15,7 +17,7 @@ def init_logging() -> None:
         root_logger.removeHandler(handler)
 
     # add console handler
-    console_handler = logging.StreamHandler()
+    console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter(logging_format)
     console_handler.setFormatter(formatter)

@@ -10,7 +10,6 @@ class ReactiveProperty(Observable[T]):
     def __init__(self, initial_value: T) -> None:
         super().__init__()
         self.subject = Subject()
-        self.subject.pipe()
         self.last_value = initial_value
         self.value = initial_value
 

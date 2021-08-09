@@ -43,9 +43,11 @@ class MainWindow(QMainWindow, LogHolder):
         self.video_capture_thread.start()
 
     def setup_status_bar(self) -> None:
-        capture_size_label = QLabel(f"Video size: {self.config.capture_size.value.x}x{self.config.capture_size.value.y}")
+        capture_size_label = QLabel()
+        self.config.capture_size.subscribe_and_run(lambda new_value: capture_size_label.setText(f"Video size: {new_value.x}x{new_value.y}"))
         self.statusBar().addWidget(capture_size_label)
-        monitor_size_label = QLabel(f"Monitor size: {self.config.screen_size.value.x}x{self.config.screen_size.value.y}")
+        monitor_size_label = QLabel()
+        self.config.screen_size.subscribe_and_run(lambda new_value: monitor_size_label.setText(f"Monitor size: {new_value.x}x{new_value.y}"))
         self.statusBar().addWidget(monitor_size_label)
 
     def closeEvent(self, event: Any) -> None:

@@ -103,7 +103,7 @@ class Vector:
 
     def __str__(self) -> str:
         """ Returns a string representation of this Vector. """
-        return "{0},{1},{2}".format(self.x, self.y, self.z)
+        return "Vector({0}, {1}, {2})".format(self.x, self.y, self.z)
 
     def __round__(self, n: int=None) -> Vector:
         """ Rounds this Vector to n decimal places (component-wise). """
