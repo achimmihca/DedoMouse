@@ -21,7 +21,7 @@ class MainWidget(QWidget, LogHolder):
         self.image_label = QLabel("Starting Camera...")
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setMinimumSize(QSize(int(160), int(120)))
-        self.main_layout.addWidget(self.image_label)
+        self.main_layout.addWidget(self.image_label, 1)
 
         self.quit_button = QPushButton("Quit")
         self.quit_button.clicked.connect(self.close_callback)
