@@ -39,31 +39,13 @@ class GestureRecognizer(LogHolder):
         self.was_thumb_up_last_frame = False
         self.was_thumb_down_last_frame = False
 
-    def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> None:
-        if (len(multi_hand_landmarks) <= 0):
-            return
-
+    def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> HandFingerPositions:
         # find landmark positions
         first_hand_landmarks = multi_hand_landmarks[0]
         hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.config.capture_size.value)
 
-        wrist_position = hand_finger_positions.wrist_position
-        thumb_tip_position = hand_finger_positions.thumb_finger_positions[-1]
-        index_finger_position = hand_finger_positions.index_finger_positions[-1]
-        middle_finger_position = hand_finger_positions.middle_finger_positions[-1]
-
-        # draw landmark positions
-        cv2.circle(frame, wrist_position.px.to_tuple_2(), 5, (255, 0, 0), -1)
-        cv2.circle(frame, thumb_tip_position.px.to_tuple_2(), 5, (0, 255, 255), -1)
-        cv2.circle(frame, index_finger_position.px.to_tuple_2(), 5, (255, 255, 0), -1)
-        cv2.circle(frame, middle_finger_position.px.to_tuple_2(), 5, (0, 255, 0), -1)
-
-        # draw click threshold
-        cv2.circle(frame, thumb_tip_position.px.to_tuple_2(), int(self.config.click_distance_threshold_low_percent.value * self.config.capture_size.value.x / 2), (0, 255, 0), 2)
-        cv2.circle(frame, thumb_tip_position.px.to_tuple_2(), int(self.config.click_distance_threshold_high_percent.value * self.config.capture_size.value.x / 2), (0, 255, 0), 2)
-
         # detect mouse position
-        mouse_pos_px = self.get_mouse_position_px(wrist_position.percent, frame)
+        mouse_pos_px = self.get_mouse_position_px(hand_finger_positions.wrist_position.percent, frame)
         self.mouse_control.on_new_mouse_position_detected(mouse_pos_px)
 
         # detect click
@@ -73,10 +55,12 @@ class GestureRecognizer(LogHolder):
         self.detect_middle_click(current_time_ms, hand_finger_positions)
 
         # detect drag
-        self.detect_drag(current_time_ms, thumb_tip_position, index_finger_position)
+        self.detect_drag(current_time_ms, hand_finger_positions.thumb_tip_position, hand_finger_positions.index_tip_position)
 
         # detect scroll
         self.detect_scoll(current_time_ms, hand_finger_positions)
+
+        return hand_finger_positions
 
     def get_mouse_position_px(self, screen_pos_percent: Vector, frame: Any) -> Vector:
         pos_percent_x = (screen_pos_percent.x - self.config.motion_border_left.value) / (1 - self.config.motion_border_left.value - self.config.motion_border_right.value)
@@ -377,7 +361,13 @@ class HandFingerPositions:
         self.middle_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.middle_finger_indexes, capture_size)
         self.ring_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.ring_finger_indexes, capture_size)
         self.pinky_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.pinky_finger_indexes, capture_size)
-        
+
+        self.thumb_tip_position = self.thumb_finger_positions[-1]
+        self.index_tip_position = self.index_finger_positions[-1]
+        self.middle_tip_position = self.middle_finger_positions[-1]
+        self.ring_tip_position = self.ring_finger_positions[-1]
+        self.pinky_tip_position = self.pinky_finger_positions[-1]
+
         self.all_finger_positions = list(chain.from_iterable([self.thumb_finger_positions,
             self.index_finger_positions,
             self.middle_finger_positions,
