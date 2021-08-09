@@ -28,12 +28,13 @@ class Config:
         self.running = ReactiveProperty(True)
         self.use_webcam = ReactiveProperty(True)
         
-        self.monitor_index = ReactiveProperty(1)
-
         self.screen_size = ReactiveProperty(Vector(1280, 720))
         self.screen_offset = ReactiveProperty(Vector(0, 0))
         self.capture_size = ReactiveProperty(Vector(1280, 720))
         self.capture_fps = ReactiveProperty(30)
+
+        self.monitor_index = ReactiveProperty(1)
+
         # Motion does not (cannot) use the full capture range
         self.motion_border_left = ReactiveProperty(0.15)
         self.motion_border_right = ReactiveProperty(0.15)
@@ -77,11 +78,9 @@ class Config:
     def enable_logging_on_value_change(self) -> None:
         for k, v in self.__dict__.items():
             if (isinstance(v, ReactiveProperty)):
-                v.subscribe(lambda new_value: self.log.info(f"config changed: {k}: {new_value}"))
+                v.subscribe(lambda new_value, name=k: self.log.info(f"config changed: {name} = {new_value}"))
 
     def update_screen_size(self) -> None:
-        self.screen_size.value = Vector(0, 0)
-
         monitors = get_monitors()
 
         if len(monitors) <= self.monitor_index.value:
@@ -90,12 +89,13 @@ class Config:
             self.screen_offset.value = Vector(0, 0)
 
         selected_monitor = monitors[self.monitor_index.value]
-        self.screen_size.value = Vector(selected_monitor.width, selected_monitor.height)
+        new_screen_size = Vector(selected_monitor.width, selected_monitor.height)
 
-        if self.screen_size.value.x <= 0 or self.screen_size.value.y <= 0:
+        if new_screen_size.x <= 0 or new_screen_size.y <= 0:
             raise ConfigException("could not determine screen size")
 
-        Config.log.info(f"screen size: {self.screen_size.value.x} x {self.screen_size.value.y}")
+        self.screen_size.value = new_screen_size
+        Config.log.info(f"found screen size: {self.screen_size.value.x} x {self.screen_size.value.y}")
 
     def save_to_file(self) -> None:
         json_string = to_json(self, True)
