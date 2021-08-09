@@ -1,10 +1,9 @@
 from __future__ import annotations
 import logging
 from screeninfo import get_monitors
-from Vector import Vector
-from util import from_json, to_json
-from ReactiveProperty import ReactiveProperty
-
+from .Vector import Vector
+from .util import from_json, to_json
+from .ReactiveProperty import ReactiveProperty
 
 class Config:
     config_file_path = "config.json"

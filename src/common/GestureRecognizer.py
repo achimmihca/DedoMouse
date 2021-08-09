@@ -2,12 +2,12 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, List
 from itertools import chain
-from cv2 import cv2 # type: ignore
-from LogHolder import LogHolder # type: ignore
-from util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except
-from MouseControl import MouseButton, MouseControl
-from Config import Config
-from Vector import Vector
+from cv2 import cv2
+from .LogHolder import LogHolder
+from .util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except
+from .MouseControl import MouseButton, MouseControl
+from .Config import Config
+from .Vector import Vector
 
 class GestureRecognizer(LogHolder):
     wrist_index = 0

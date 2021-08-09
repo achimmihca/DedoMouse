@@ -1,8 +1,7 @@
 from typing import Any, Dict
 import jsonpickle # type: ignore
-from Config import Config
-from ReactiveProperty import ReactiveProperty
-
+from .Config import Config
+from .ReactiveProperty import ReactiveProperty
 
 class ConfigJsonHandler(jsonpickle.handlers.BaseHandler):
     # 'obj' is the Config object

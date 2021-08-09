@@ -1,13 +1,12 @@
 from typing import Callable
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import QTabWidget, QWidget, QLabel, QPushButton, QVBoxLayout
-
-from Config import Config
-from LogHolder import LogHolder
-from gui.ConfigVariableCheckBox import ConfigVariableCheckBox
-from gui.EnabledMouseActionsControl import EnabledMouseActionsControl
-from gui.MonitorConfigControl import MonitorConfigControl
-from gui.qtutils import new_group
+from common.Config import Config
+from common.LogHolder import LogHolder
+from .ConfigVariableCheckBox import ConfigVariableCheckBox
+from .EnabledMouseActionsControl import EnabledMouseActionsControl
+from .MonitorConfigControl import MonitorConfigControl
+from .qtutils import new_group
 
 class MainWidget(QWidget, LogHolder):
     def __init__(self, config: Config, close_callback: Callable) -> None:
@@ -21,7 +20,7 @@ class MainWidget(QWidget, LogHolder):
 
         self.image_label = QLabel("Starting Camera...")
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setMinimumSize(QSize(int(320), int(240)))
+        self.image_label.setMinimumSize(QSize(int(160), int(120)))
         self.main_layout.addWidget(self.image_label)
 
         self.quit_button = QPushButton("Quit")

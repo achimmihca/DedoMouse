@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
-from Config import Config
-from gui.ConfigVariableCheckBox import ConfigVariableCheckBox
+from common.Config import Config
+from .ConfigVariableCheckBox import ConfigVariableCheckBox
 
 class EnabledMouseActionsControl(QWidget):
     def __init__(self, config: Config) -> None:

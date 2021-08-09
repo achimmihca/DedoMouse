@@ -3,12 +3,11 @@
 from typing import Any
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QLabel
-
-from Config import Config
-from LogHolder import LogHolder
-from WebcamControl import WebcamControl
-from gui.MainWidget import MainWidget
-from gui.VideoCaptureThread import VideoCaptureThread
+from common.Config import Config
+from common.LogHolder import LogHolder
+from common.WebcamControl import WebcamControl
+from .MainWidget import MainWidget
+from .VideoCaptureThread import VideoCaptureThread
 
 class MainWindow(QMainWindow, LogHolder):
     def __init__(self, config: Config, webcam_control: WebcamControl) -> None:

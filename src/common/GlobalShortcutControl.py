@@ -1,7 +1,7 @@
 from typing import Callable
 import keyboard # type: ignore
-from Config import Config
-from LogHolder import LogHolder
+from .Config import Config
+from .LogHolder import LogHolder
 
 class GlobalShortcutControl(LogHolder):
     def __init__(self, config: Config, on_close_callback: Callable):

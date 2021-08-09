@@ -2,13 +2,13 @@
 
 from typing import Any
 import logging
+import cv2
 from PySide6.QtCore import QThread
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QLabel
-import cv2
-from Config import Config # type: ignore
+from common.Config import Config # type: ignore
 
-from WebcamControl import WebcamControl
+from common.WebcamControl import WebcamControl
 
 class VideoCaptureThread(QThread):
     def __init__(self, config: Config, webcam_control: WebcamControl, video_display_label: QLabel) -> None:

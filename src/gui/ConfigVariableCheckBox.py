@@ -1,8 +1,7 @@
 from PySide6.QtWidgets import QCheckBox
-
 from typing import Any
-from Config import Config
-from LogHolder import LogHolder
+from common.Config import Config
+from common.LogHolder import LogHolder
 
 class ConfigVariableCheckBox(QCheckBox, LogHolder):
     def __init__(self, config: Config, varname: str, label_name: str) -> None:

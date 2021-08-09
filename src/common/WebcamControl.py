@@ -1,10 +1,10 @@
 from typing import Any, Callable, List
-from cv2 import cv2 # type: ignore
+from cv2 import cv2
 import mediapipe as mp # type: ignore
-from Config import Config
-from GestureRecognizer import GestureRecognizer
-from LogHolder import LogHolder
-from Vector import Vector
+from .Config import Config
+from .GestureRecognizer import GestureRecognizer
+from .LogHolder import LogHolder
+from .Vector import Vector
 
 class WebcamControl(LogHolder):
     def __init__(self, config: Config, gesture_regocnizer: GestureRecognizer):

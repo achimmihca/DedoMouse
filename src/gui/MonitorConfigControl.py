@@ -1,10 +1,10 @@
 from PySide6.QtWidgets import QComboBox, QFormLayout, QHBoxLayout, QSpinBox, QWidget
-from screeninfo.screeninfo import get_monitors
+from screeninfo import get_monitors
 
-from Config import Config
-from LogHolder import LogHolder
-from Vector import Vector
-from gui.qtutils import new_label
+from common.Config import Config
+from common.LogHolder import LogHolder
+from common.Vector import Vector
+from .qtutils import new_label
 
 class MonitorConfigControl(QWidget, LogHolder):
     def __init__(self, config: Config) -> None:
@@ -30,10 +30,10 @@ class MonitorConfigControl(QWidget, LogHolder):
         self.monitor_offset_x_spinner = MonitorOffsetSpinBox()
         self.monitor_offset_y_spinner = MonitorOffsetSpinBox()
         self.main_layout.addRow(new_label("Offset X (Pixels)",
-                                         "Sum of all monitor widths that are left of the target monitor"),
+                                          "Sum of all monitor widths that are left of the target monitor"),
             self.monitor_offset_x_spinner)
         self.main_layout.addRow(new_label("Offset Y (Pixels)",
-                                         "Sum of all monitor heights that are below the target monitor"),
+                                          "Sum of all monitor heights that are below the target monitor"),
             self.monitor_offset_y_spinner)
 
         # update controls on config change

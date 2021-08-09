@@ -3,14 +3,14 @@ import logging
 import sys
 
 from PySide6.QtWidgets import QApplication
-from Config import Config
-from ConfigJsonHandler import ConfigJsonHandler
+from common.Config import Config
+from common.ConfigJsonHandler import ConfigJsonHandler
 from gui.MainWindow import MainWindow
-from Log import init_logging
-from MouseControl import MouseControl
-from WebcamControl import WebcamControl
-from GestureRecognizer import GestureRecognizer
-from GlobalShortcutControl import GlobalShortcutControl
+from common.Log import init_logging
+from common.MouseControl import MouseControl
+from common.WebcamControl import WebcamControl
+from common.GestureRecognizer import GestureRecognizer
+from common.GlobalShortcutControl import GlobalShortcutControl
 
 init_logging()
 logging.getLogger('root').info("=============================================")

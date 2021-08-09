@@ -1,11 +1,11 @@
 from __future__ import annotations
 import mouse # type: ignore
 from enum import Enum
-from Config import Config
-from LogHolder import LogHolder
-from PidControl import PidControl
-from Vector import Vector
-from util import get_time_ms
+from .Config import Config
+from .LogHolder import LogHolder
+from .PidControl import PidControl
+from .Vector import Vector
+from .util import get_time_ms
 
 class MouseControl(LogHolder):
     def __init__(self, config: Config):
