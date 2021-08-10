@@ -28,12 +28,12 @@ class Config:
         self.running = ReactiveProperty(True)
         self.use_webcam = ReactiveProperty(True)
         
-        self.screen_size = ReactiveProperty(Vector(1280, 720))
-        self.screen_offset = ReactiveProperty(Vector(0, 0))
-        self.capture_size = ReactiveProperty(Vector(1280, 720))
-        self.capture_fps = ReactiveProperty(30)
-
         self.monitor_index = ReactiveProperty(1)
+        self.screen_size = ReactiveProperty(Vector(0, 0))
+        self.screen_offset = ReactiveProperty(Vector(0, 0))
+
+        self.capture_size = ReactiveProperty(Vector(1920, 1080))
+        self.capture_fps = ReactiveProperty(30)
 
         # Motion does not (cannot) use the full capture range
         self.motion_border_left = ReactiveProperty(0.15)

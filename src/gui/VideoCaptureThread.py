@@ -6,7 +6,8 @@ import cv2
 from PySide6.QtCore import QThread
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QLabel
-from common.Config import Config # type: ignore
+from common.Config import Config
+from common.Vector import Vector
 
 from common.WebcamControl import WebcamControl
 
@@ -23,12 +24,12 @@ class VideoCaptureThread(QThread):
         self.webcam_control.frame_analyzed_callbacks.append(self.display_video_frame)
         self.webcam_control.start_video_capture()
 
-    def display_video_frame(self, frame: Any) -> None:
+    def display_video_frame(self, frame: Any, frame_size: Vector) -> None:
         try:
             label_width = self.video_display_label.width()
             label_height = self.video_display_label.height()
-            scale_x = label_width / self.config.capture_size.value.x
-            scale_y = label_height / self.config.capture_size.value.y
+            scale_x = label_width / frame_size.x
+            scale_y = label_height / frame_size.y
             scale = min(scale_x, scale_y)
             frame = cv2.resize(frame, None, fx=scale, fy=scale)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

@@ -2,3 +2,7 @@ QStatusBar QLabel {
     padding-left: 10px;
     padding-right: 10px;
 }
+
+QLabel[cssClass=highlight] {
+    color: red;
+}

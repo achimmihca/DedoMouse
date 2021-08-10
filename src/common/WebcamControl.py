@@ -13,7 +13,7 @@ class WebcamControl(LogHolder):
         self.config = config
         self.gesture_regocnizer = gesture_regocnizer
         self.fps = 0
-        self.frame_analyzed_callbacks: List[Callable] = []
+        self.frame_analyzed_callbacks: List[Callable[[Any, Vector], None]] = []
 
     def start_video_capture(self) -> None:
         if not self.config.running.value:
@@ -21,6 +21,10 @@ class WebcamControl(LogHolder):
 
         self.log.info("starting video capture")
         cap = cv2.VideoCapture(0)
+
+        default_capture_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        default_capture_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.log.info(f"default video capture size of camera: {default_capture_width}x{default_capture_height}")
 
         # configure video capture
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.capture_size.value.x)
@@ -30,10 +34,11 @@ class WebcamControl(LogHolder):
         # check video capture configuration was successful
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.actual_capture_size = Vector(width, height)
         if (self.config.capture_size.value.x != width
                 or self.config.capture_size.value.y != height):
             self.log.warning(f"Configured video size {self.config.capture_size.value.x}x{self.config.capture_size.value.y} does not match actual video size {width}x{height}")
-            self.config.capture_size.value = Vector(width, height)
+            self.config.capture_size.value = self.actual_capture_size
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         if (self.config.capture_fps.value != self.fps):
@@ -64,7 +69,7 @@ class WebcamControl(LogHolder):
                 self.draw_finger_position_overlay(frame, hand_finger_positions)
 
             for callback in self.frame_analyzed_callbacks:
-                callback(frame)
+                callback(frame, self.actual_capture_size)
 
             cv2.waitKey(33)
 
@@ -77,10 +82,10 @@ class WebcamControl(LogHolder):
         # draw motion border
         color = (127, 127, 127)
         thickness = 2
-        motion_border_left_x = self.config.motion_border_left.value * self.config.capture_size.value.x
-        motion_border_right_x = self.config.capture_size.value.x - self.config.motion_border_right.value * self.config.capture_size.value.x
-        motion_border_top_y = self.config.motion_border_top.value * self.config.capture_size.value.y
-        motion_border_bottom_y = self.config.capture_size.value.y - self.config.motion_border_bottom.value * self.config.capture_size.value.y
+        motion_border_left_x = self.config.motion_border_left.value * self.actual_capture_size.x
+        motion_border_right_x = self.actual_capture_size.x - self.config.motion_border_right.value * self.actual_capture_size.x
+        motion_border_top_y = self.config.motion_border_top.value * self.actual_capture_size.y
+        motion_border_bottom_y = self.actual_capture_size.y - self.config.motion_border_bottom.value * self.actual_capture_size.y
 
         # motion border frame
         draw_line(frame, Vector(motion_border_left_x, motion_border_top_y), Vector(motion_border_left_x, motion_border_bottom_y), color, thickness)
@@ -89,9 +94,9 @@ class WebcamControl(LogHolder):
         draw_line(frame, Vector(motion_border_left_x, motion_border_bottom_y), Vector(motion_border_right_x, motion_border_bottom_y), color, thickness)
         # vertical to edges
         draw_line(frame, Vector(0, 0), Vector(motion_border_left_x, motion_border_top_y), color, thickness)
-        draw_line(frame, Vector(self.config.capture_size.value.x, 0), Vector(motion_border_right_x, motion_border_top_y), color, thickness)
-        draw_line(frame, Vector(0, self.config.capture_size.value.y), Vector(motion_border_left_x, motion_border_bottom_y), color, thickness)
-        draw_line(frame, Vector(self.config.capture_size.value.x, self.config.capture_size.value.y), Vector(motion_border_right_x, motion_border_bottom_y), color, thickness)
+        draw_line(frame, Vector(self.actual_capture_size.x, 0), Vector(motion_border_right_x, motion_border_top_y), color, thickness)
+        draw_line(frame, Vector(0, self.actual_capture_size.y), Vector(motion_border_left_x, motion_border_bottom_y), color, thickness)
+        draw_line(frame, Vector(self.actual_capture_size.x, self.actual_capture_size.y), Vector(motion_border_right_x, motion_border_bottom_y), color, thickness)
 
     def draw_finger_position_overlay(self, frame: Any, hand_finger_positions: HandFingerPositions) -> None:
         # draw landmark positions
@@ -101,5 +106,5 @@ class WebcamControl(LogHolder):
         draw_circle(frame, hand_finger_positions.middle_tip_position.px, 5, (0, 255, 0))
 
         # draw click threshold
-        draw_circle(frame, hand_finger_positions.thumb_tip_position.px, self.config.click_distance_threshold_low_percent.value * self.config.capture_size.value.x / 2, (0, 255, 0), 2)
-        draw_circle(frame, hand_finger_positions.thumb_tip_position.px, self.config.click_distance_threshold_high_percent.value * self.config.capture_size.value.x / 2, (0, 255, 0), 2)
+        draw_circle(frame, hand_finger_positions.thumb_tip_position.px, self.config.click_distance_threshold_low_percent.value * self.actual_capture_size.x / 2, (0, 255, 0), 2)
+        draw_circle(frame, hand_finger_positions.thumb_tip_position.px, self.config.click_distance_threshold_high_percent.value * self.actual_capture_size.x / 2, (0, 255, 0), 2)
