@@ -23,6 +23,15 @@ class Vector:
         return vec2.subtract(vec1).magnitude()
 
     @staticmethod
+    def distance_xy(vec1: Vector, vec2: Vector) -> float:
+        """ Calculates distance between two vectors, thereby only considering x and y coordinate. """
+        return Vector.distance(Vector(vec1.x, vec1.y, 0), Vector(vec2.x, vec2.y, 0))
+
+    @staticmethod
+    def distance_z(vec1: Vector, vec2: Vector) -> float:
+        return abs(vec1.z - vec2.z)
+
+    @staticmethod
     def from_tuple2(t: Tuple[float, float]) -> Vector:
         """ Create a Vector from a tuple in the form (x, y). """
         return Vector(t[0], t[1])

@@ -119,7 +119,7 @@ class GestureRecognizer(LogHolder):
             index_finger_pos: FingerPosition) -> None:
         # drag start gesture: holding a click gesture (index near thumb for a longer time)
         # drag end gesture: releasing click gesture (index not near thumb anymore)
-        distance_thumb_index_percent = Vector.distance(thumb_pos.percent, index_finger_pos.percent)
+        distance_thumb_index_percent = Vector.distance_xy(thumb_pos.percent, index_finger_pos.percent)
 
         if (distance_thumb_index_percent > self.config.click_distance_threshold_high_percent.value):
             self.is_potential_drag_gesture = False
@@ -165,7 +165,7 @@ class GestureRecognizer(LogHolder):
     def is_faraway_target(self,
             finger_positions: List[FingerPosition],
             target_position: FingerPosition) -> bool:
-        finger_target_distances_percent = [Vector.distance(finger_position.percent, target_position.percent) for finger_position in finger_positions]
+        finger_target_distances_percent = [Vector.distance_xy(finger_position.percent, target_position.percent) for finger_position in finger_positions]
 
         all_fingers_not_near_target = all(distance_percent > self.config.click_distance_threshold_high_percent.value
             for distance_percent in finger_target_distances_percent)
@@ -175,7 +175,7 @@ class GestureRecognizer(LogHolder):
     def is_near_target(self,
             finger_positions: List[FingerPosition],
             target_position: FingerPosition) -> bool:
-        finger_target_distances_percent = [Vector.distance(finger_position.percent, target_position.percent) for finger_position in finger_positions]
+        finger_target_distances_percent = [Vector.distance_xy(finger_position.percent, target_position.percent) for finger_position in finger_positions]
 
         all_fingers_near_target = all(distance_percent < self.config.click_distance_threshold_low_percent.value
             for distance_percent in finger_target_distances_percent)
@@ -356,7 +356,7 @@ class GestureRecognizer(LogHolder):
 class HandFingerPositions:
     def __init__(self, single_hand_landmarks: Any, capture_size: Vector) -> None:
         self.single_hand_landmarks = single_hand_landmarks
-        
+
         self.wrist_position = FingerPosition(single_hand_landmarks.landmark[GestureRecognizer.wrist_index], capture_size)
         self.thumb_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.thumb_finger_indexes, capture_size)
         self.index_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.index_finger_indexes, capture_size)
@@ -417,7 +417,7 @@ class HandFingerPositions:
 
 class FingerPosition:
     def __init__(self, landmark: Any, capture_size: Vector) -> None:
-        self.percent = Vector.from_xy(landmark)
+        self.percent = Vector.from_xyz(landmark)
         self.px = self.percent.scale(capture_size).to_int_vector()
 
 class ThumbGestureDirection(Enum):
