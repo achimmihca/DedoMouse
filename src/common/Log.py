@@ -1,12 +1,13 @@
 import logging
 import sys
 
+logging_format = '%(asctime)s - %(levelname)s - %(name)s.%(funcName)s - %(message)s'
 
 def init_logging() -> None:
+    global logging_format
+
     log = logging.getLogger("initLoggingLogger")
     log.info("initializing logging")
-
-    logging_format = '%(asctime)s - %(levelname)s - %(name)s.%(funcName)s - %(message)s'
 
     # create logger
     root_logger = logging.getLogger('root')
@@ -29,5 +30,7 @@ def init_logging() -> None:
     formatter = logging.Formatter(logging_format)
     console_handler.setFormatter(formatter)
     root_logger.addHandler(console_handler)
+
+    logging.StreamHandler()
     
     log.info("init logging done")
