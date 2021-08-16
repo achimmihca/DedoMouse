@@ -33,6 +33,14 @@ However, licenses of the used libraries (see requirements.txt) differ.
 For development only:
 - pylint: [GPL v2.0](https://github.com/rr-/pylint/blob/main/LICENSE)
 - mypy: [MIT and others](https://github.com/python/mypy/blob/master/LICENSE)
+- pyinstaller: [Custom GPL](https://github.com/pyinstaller/pyinstaller/blob/develop/COPYING.txt)
+
+## Create Executable
+Open a console in the virtual environment, then run
+
+`pyinstaller main.spec`
+
+This should create a folder named `dist` with the executable.
 
 ## Trivia
 'Dedo' is Spanish and means 'finger'.
