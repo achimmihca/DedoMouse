@@ -11,10 +11,11 @@ from common.MouseControl import MouseControl
 from common.WebcamControl import WebcamControl
 from common.GestureRecognizer import GestureRecognizer
 from common.GlobalShortcutControl import GlobalShortcutControl
+from common.version import version
 
 init_logging()
 logging.getLogger('root').info("=============================================")
-logging.getLogger('root').info("DedoMouse started")
+logging.getLogger('root').info(f"DedoMouse {version} started")
 logging.getLogger('root').info("=============================================")
 
 ConfigJsonHandler.handles(Config)

@@ -4,6 +4,7 @@ from typing import Any
 from PySide6.QtGui import QResizeEvent
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QLabel
+from common.version import version
 from common.Config import Config
 from common.LogHolder import LogHolder
 from common.WebcamControl import WebcamControl
@@ -17,6 +18,7 @@ class MainWindow(QMainWindow, LogHolder):
     def __init__(self, config: Config, webcam_control: WebcamControl) -> None:
         QMainWindow.__init__(self)
         LogHolder.__init__(self)
+        self.setWindowTitle(f"DedoMouse")
         self.config = config
         self.webcam_control = webcam_control
 
@@ -62,9 +64,14 @@ class MainWindow(QMainWindow, LogHolder):
         self.video_capture_thread.start()
 
     def setup_status_bar(self) -> None:
+        global version
+        version_label = QLabel(f"Version: {version}")
+        self.statusBar().addWidget(version_label)
+
         capture_size_label = QLabel()
         self.config.capture_size.subscribe_and_run(lambda new_value: capture_size_label.setText(f"Video size: {new_value.x}x{new_value.y}"))
         self.statusBar().addWidget(capture_size_label)
+
         monitor_size_label = QLabel()
         self.config.screen_size.subscribe_and_run(lambda new_value: monitor_size_label.setText(f"Monitor size: {new_value.x}x{new_value.y}"))
         self.statusBar().addWidget(monitor_size_label)
