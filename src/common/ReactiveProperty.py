@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, Optional, TypeVar, Union, Callable
 from rx.core import typing
 from rx.core.typing import Observable
 from rx.subject.subject import Subject
@@ -37,6 +37,9 @@ class ReactiveProperty(Observable[T]):
         elif observer and callable(observer):
             observer(self.value)
         return res
+
+    def pipe(self, operators: Any) -> Any:
+        return self.subject.pipe(operators) # type: ignore
 
     def __setattr__(self, name: str, value: Any) -> None:
         super().__setattr__(name, value)

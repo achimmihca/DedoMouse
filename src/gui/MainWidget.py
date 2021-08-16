@@ -4,10 +4,10 @@ from PySide6.QtWidgets import QTabWidget, QWidget, QLabel, QPushButton, QVBoxLay
 from common.Config import Config
 from common.LogHolder import LogHolder
 from .MonitorConfigTab import MonitorConfigTab
-from .OtherConfigTab import OtherConfigTab
 from .VideoConfigTab import VideoConfigTab
 from .EnabledMouseActionsTab import EnabledMouseActionsTab
 from .GeometryConfigTab import GeometryConfigTab
+from .ShortcutsConfigTab import ShortcutsConfigTab
 
 class MainWidget(QWidget, LogHolder):
     def __init__(self, config: Config, close_callback: Callable) -> None:
@@ -38,4 +38,4 @@ class MainWidget(QWidget, LogHolder):
         self.tab_widget.addTab(MonitorConfigTab(config), "Monitor")
         self.tab_widget.addTab(VideoConfigTab(config), "Video")
         self.tab_widget.addTab(GeometryConfigTab(config), "Geometry")
-        self.tab_widget.addTab(OtherConfigTab(config), "Misc.")
+        self.tab_widget.addTab(ShortcutsConfigTab(config), "Shortcuts")

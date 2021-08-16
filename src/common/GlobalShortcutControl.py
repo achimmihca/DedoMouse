@@ -10,16 +10,20 @@ class GlobalShortcutControl(LogHolder):
         self.on_close_callback = on_close_callback
  
     def start_listener(self) -> None:
-        for shortcut in self.config.exit_shortcuts.value:
-            keyboard.add_hotkey(shortcut, self.on_exit, args=[shortcut])
-        for shortcut in self.config.toggle_control_mouse_position_shortcuts.value:
-            keyboard.add_hotkey(shortcut, self.on_toggle_control_mouse_position)
-        for shortcut in self.config.toggle_control_click_shortcuts.value:
-            keyboard.add_hotkey(shortcut, self.on_toggle_control_click)
-        for shortcut in self.config.toggle_control_scroll_shortcuts.value:
-            keyboard.add_hotkey(shortcut, self.on_toggle_control_scroll)
-        for shortcut in self.config.toggle_all_control_disabled_shortcuts.value:
-            keyboard.add_hotkey(shortcut, self.on_toggle_all_control_disabled)
+        try:
+            for shortcut in self.config.exit_shortcuts.value:
+                keyboard.add_hotkey(shortcut, self.on_exit, args=[shortcut])
+            for shortcut in self.config.toggle_control_mouse_position_shortcuts.value:
+                keyboard.add_hotkey(shortcut, self.on_toggle_control_mouse_position)
+            for shortcut in self.config.toggle_control_click_shortcuts.value:
+                keyboard.add_hotkey(shortcut, self.on_toggle_control_click)
+            for shortcut in self.config.toggle_control_scroll_shortcuts.value:
+                keyboard.add_hotkey(shortcut, self.on_toggle_control_scroll)
+            for shortcut in self.config.toggle_all_control_disabled_shortcuts.value:
+                keyboard.add_hotkey(shortcut, self.on_toggle_all_control_disabled)
+        except Exception as e:
+            self.log.error("Could not register shortcuts")
+            self.log.exception(e)
 
     def on_exit(self, shortcut: str) -> None:
         self.log.info(f'Closing app because of shortcut: {shortcut}')

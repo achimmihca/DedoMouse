@@ -75,6 +75,8 @@ class Config:
         self.toggle_control_scroll_shortcuts = ReactiveProperty(["ctrl+shift+alt+s", "f10"])
         self.toggle_all_control_disabled_shortcuts = ReactiveProperty(["ctrl+shift+alt+a", "f2"])
 
+        self.window_size = ReactiveProperty(Vector(480, 320))
+
     def enable_logging_on_value_change(self) -> None:
         for k, v in self.__dict__.items():
             if (isinstance(v, ReactiveProperty)):
