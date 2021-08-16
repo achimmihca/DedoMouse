@@ -40,7 +40,7 @@ class Vector:
     @staticmethod
     def from_xyz(other: Any) -> Vector:
         """ Create a Vector from an object with properties x and y and z. """
-        return Vector(other.x, other.y)
+        return Vector(other.x, other.y, other.z)
 
     @staticmethod
     def from_list(l: List[float]) -> Vector:
