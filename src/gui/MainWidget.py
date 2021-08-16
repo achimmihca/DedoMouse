@@ -7,6 +7,7 @@ from .MonitorConfigTab import MonitorConfigTab
 from .OtherConfigTab import OtherConfigTab
 from .VideoConfigTab import VideoConfigTab
 from .EnabledMouseActionsTab import EnabledMouseActionsTab
+from .GeometryConfigTab import GeometryConfigTab
 
 class MainWidget(QWidget, LogHolder):
     def __init__(self, config: Config, close_callback: Callable) -> None:
@@ -36,4 +37,5 @@ class MainWidget(QWidget, LogHolder):
         self.tab_widget.addTab(EnabledMouseActionsTab(config), "Controls")
         self.tab_widget.addTab(MonitorConfigTab(config), "Monitor")
         self.tab_widget.addTab(VideoConfigTab(config), "Video")
+        self.tab_widget.addTab(GeometryConfigTab(config), "Geometry")
         self.tab_widget.addTab(OtherConfigTab(config), "Misc.")

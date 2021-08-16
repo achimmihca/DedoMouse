@@ -45,8 +45,10 @@ class GestureRecognizer(LogHolder):
         hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.config.capture_size.value)
 
         # detect mouse position
-        mouse_pos_px = self.get_mouse_position_px(hand_finger_positions.wrist_position.percent, frame)
-        self.mouse_control.on_new_mouse_position_detected(mouse_pos_px)
+        if (self.config.motion_border_left.value + self.config.motion_border_right.value < 1
+                and self.config.motion_border_bottom.value + self.config.motion_border_top.value < 1):
+            mouse_pos_px = self.get_mouse_position_px(hand_finger_positions.wrist_position.percent, frame)
+            self.mouse_control.on_new_mouse_position_detected(mouse_pos_px)
 
         # detect click
         current_time_ms = get_time_ms()
