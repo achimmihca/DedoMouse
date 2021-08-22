@@ -22,7 +22,14 @@ class VideoCaptureThread(QThread):
     def run(self) -> None:
         self.log.info("started VideoCaptureThread")
         self.webcam_control.frame_analyzed_callbacks.append(self.display_video_frame)
-        self.webcam_control.start_video_capture()
+        try:
+            video_capture_error_message = self.webcam_control.start_video_capture()
+            if video_capture_error_message is not None:
+                self.video_display_label.setText(video_capture_error_message)
+        except Exception:
+            error_message = "Error during video capture or processing"
+            self.log.exception(error_message)
+            self.video_display_label.setText(error_message)
 
     def display_video_frame(self, frame: Any, frame_size: Vector) -> None:
         try:
@@ -36,5 +43,5 @@ class VideoCaptureThread(QThread):
             image = QImage(frame, frame.shape[1], frame.shape[0], 
                         frame.strides[0], QImage.Format_RGB888)
             self.video_display_label.setPixmap(QPixmap.fromImage(image))
-        except Exception as e:
-            self.log.error(f"Could not display video: {str(e)}")
+        except Exception:
+            self.log.exception(f"Could not display video.")
