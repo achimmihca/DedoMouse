@@ -46,3 +46,9 @@ class ReactiveProperty(Observable[T]):
         if (name == "value" and self.value != self.last_value):
             self.subject.on_next(value)
             self.last_value = self.value
+
+    def set_value(self, new_value: T) -> None:
+        self.value = new_value
+
+    def get_value(self) -> T:
+        return self.value
