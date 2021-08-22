@@ -67,6 +67,7 @@ DedoMouse itself is licensed under [MIT License](https://github.com/achimmihca/D
 However, licenses of the used libraries (see requirements.txt) differ.
 - mediapipe: [Apache License v2.0](https://github.com/google/mediapipe/blob/master/LICENSE)
 - opencv: [Apache License v2.0](https://github.com/opencv/opencv/blob/master/LICENSE)
+- rxpy: [Apache License v2.0](https://github.com/Reactive-Extensions/RxPy/blob/master/LICENSE)
 - screeninfo: [MIT](https://github.com/rr-/screeninfo/blob/master/LICENSE.md)
 - keyboard: [MIT](https://github.com/boppreh/keyboard/blob/master/LICENSE.txt)
 - mouse: [MIT](https://github.com/boppreh/mouse/blob/master/LICENSE.txt)
