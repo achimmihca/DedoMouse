@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QGroupBox, QSpinBox, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QGroupBox, QSpinBox, QLabel, QRadioButton, QLineEdit
 from common.Config import Config
+from common.Config import VideoCaptureSource
 from common.LogHolder import LogHolder
 from common.Vector import Vector
 from .MonitorConfigTab import MonitorDimensionSpinBox
@@ -14,6 +15,7 @@ class VideoConfigTab(QWidget, LogHolder):
 
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.create_capture_size_group())
+        self.layout().addWidget(self.create_capture_source_group())
 
         # Warning label
         label = QLabel("Parameters of this tab require a restart")
@@ -21,6 +23,57 @@ class VideoConfigTab(QWidget, LogHolder):
         label.setProperty("cssClass", "highlight") # type: ignore
         self.layout().addWidget(label)
 
+    def create_capture_source_group(self) -> QWidget:
+        group = QGroupBox("Capture Source")
+        group.setLayout(QFormLayout())
+
+        # Internal camera
+        self.internal_webcam_button = QRadioButton("Integrated Webcam")
+        self.internal_webcam_button.setToolTip("Specifies that an integrated or otherwise connected (e.g. via USB) webcam should be used.")
+        group.layout().addRow(self.internal_webcam_button)
+
+        device_index_spinner = QSpinBox()
+        device_index_spinner.setMinimum(0)
+        device_index_spinner.setMaximum(100)
+        group.layout().addRow(new_label("Device Number",
+                                        "Specifies the webcam to use if multiple devices are available. First device is 0, second is 1, etc."),
+                              device_index_spinner)
+
+        self.config.capture_device_index.subscribe_and_run(lambda new_value: device_index_spinner.setValue(new_value))
+        device_index_spinner.valueChanged.connect(lambda new_value: self.config.capture_device_index.set_value(new_value))
+
+        # IP Camera
+        self.ip_webcam_button = QRadioButton("IP Camera")
+        self.ip_webcam_button.setToolTip("Specifies that a video stream from an IP camera should be used (e.g. from a smartphone).")
+        group.layout().addRow(self.ip_webcam_button)
+
+        self.ip_webcam_url_text_edit = QLineEdit()
+        group.layout().addRow(new_label("URL",
+                                        "URL to access the IP Camera's video stream. Expects a video in MJPEG format"),
+                              self.ip_webcam_url_text_edit)
+
+        self.config.capture_source_url.subscribe_and_run(lambda new_value: self.ip_webcam_url_text_edit.setText(new_value))
+        self.ip_webcam_url_text_edit.editingFinished.connect(lambda: self.config.capture_source_url.set_value(self.ip_webcam_url_text_edit.text())) # type: ignore
+
+        self.config.capture_source.subscribe_and_run(self.update_radio_buttons_by_capture_source)
+        self.internal_webcam_button.toggled.connect(self.update_config_by_internal_webcam_button) # type: ignore
+        self.ip_webcam_button.toggled.connect(self.update_config_by_ip_webcam_button) # type: ignore
+
+        return group
+
+    def update_config_by_internal_webcam_button(self, is_checked: bool) -> None:
+        if is_checked:
+            self.config.capture_source.value = VideoCaptureSource.INTEGRATED_WEBCAM
+
+    def update_config_by_ip_webcam_button(self, is_checked: bool) -> None:
+        if is_checked:
+            self.config.capture_source.value = VideoCaptureSource.IP_WEBCAM
+
+    def update_radio_buttons_by_capture_source(self, new_value: VideoCaptureSource) -> None:
+        if (new_value == VideoCaptureSource.INTEGRATED_WEBCAM):
+            self.internal_webcam_button.setChecked(True)
+        elif (new_value == VideoCaptureSource.IP_WEBCAM):
+            self.ip_webcam_button.setChecked(True)
 
     def create_capture_size_group(self) -> QWidget:
         group = QGroupBox("Capture Size")

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from enum import Enum
 import logging
 from screeninfo import get_monitors
 from .Vector import Vector
@@ -18,10 +19,9 @@ class Config:
                 loaded_config.running.value = True
                 Config.log.info(f"Loaded config from '{Config.config_file_path}'.")
                 return loaded_config
-        except Exception as e:
+        except Exception:
             loaded_config = Config()
-            Config.log.error(f"Created new config. Could not load config from '{Config.config_file_path}'")
-            Config.log.exception(e)
+            Config.log.exception(f"Created new config. Could not load config from '{Config.config_file_path}'")
             return loaded_config
 
     def __init__(self) -> None:
@@ -34,6 +34,9 @@ class Config:
 
         self.capture_size = ReactiveProperty(Vector(1920, 1080))
         self.capture_fps = ReactiveProperty(30)
+        self.capture_device_index = ReactiveProperty(0)
+        self.capture_source = ReactiveProperty(VideoCaptureSource.INTEGRATED_WEBCAM)
+        self.capture_source_url = ReactiveProperty("http://192.168.1.1:4444/shot.jpg")
 
         # Motion does not (cannot) use the full capture range
         self.motion_border_left = ReactiveProperty(0.15)
@@ -108,3 +111,8 @@ class Config:
 
 class ConfigException(Exception):
     pass
+
+
+class VideoCaptureSource(Enum):
+    INTEGRATED_WEBCAM = 0
+    IP_WEBCAM = 1

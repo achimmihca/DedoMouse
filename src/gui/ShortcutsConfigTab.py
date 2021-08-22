@@ -37,6 +37,6 @@ class ShortcutsConfigTab(QWidget, LogHolder):
             reactive_property.value = shortcuts
 
         reactive_property.subscribe_and_run(lambda new_values: text_edit.setText(", ".join(new_values)))
-        text_edit.textChanged.connect(on_text_changed) # type: ignore
+        text_edit.editingFinished.connect(on_text_changed) # type: ignore
 
         return text_edit

@@ -21,9 +21,8 @@ class GlobalShortcutControl(LogHolder):
                 keyboard.add_hotkey(shortcut, self.on_toggle_control_scroll)
             for shortcut in self.config.toggle_all_control_disabled_shortcuts.value:
                 keyboard.add_hotkey(shortcut, self.on_toggle_all_control_disabled)
-        except Exception as e:
-            self.log.error("Could not register shortcuts")
-            self.log.exception(e)
+        except Exception:
+            self.log.exception("Could not register shortcuts")
 
     def on_exit(self, shortcut: str) -> None:
         self.log.info(f'Closing app because of shortcut: {shortcut}')
