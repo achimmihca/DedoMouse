@@ -68,13 +68,17 @@ class MainWindow(QMainWindow, LogHolder):
         version_label = QLabel(f"Version: {version}")
         self.statusBar().addWidget(version_label)
 
-        capture_size_label = QLabel()
-        self.config.capture_size.subscribe_and_run(lambda new_value: capture_size_label.setText(f"Video size: {new_value.x}x{new_value.y}"))
-        self.statusBar().addWidget(capture_size_label)
+        self.capture_size_label = QLabel()
+        self.config.capture_size.subscribe_and_run(self.update_capture_size_label)
+        self.config.capture_fps.subscribe_and_run(self.update_capture_size_label)
+        self.statusBar().addWidget(self.capture_size_label)
 
         monitor_size_label = QLabel()
         self.config.screen_size.subscribe_and_run(lambda new_value: monitor_size_label.setText(f"Monitor size: {new_value.x}x{new_value.y}"))
         self.statusBar().addWidget(monitor_size_label)
+
+    def update_capture_size_label(self, new_value: Any) -> None:
+        self.capture_size_label.setText(f"Video: {self.webcam_control.actual_capture_size.x}x{self.webcam_control.actual_capture_size.y}@{self.webcam_control.fps}")
 
     def closeEvent(self, event: Any) -> None:
         self.log.info("shutting down app")

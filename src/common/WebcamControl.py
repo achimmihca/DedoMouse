@@ -15,8 +15,8 @@ class WebcamControl(LogHolder):
         super().__init__()
         self.config = config
         self.actual_capture_size = self.config.capture_size.value
+        self.fps = self.config.capture_fps.value
         self.gesture_regocnizer = gesture_regocnizer
-        self.fps = 0
         self.frame_analyzed_callbacks: List[Callable[[Any, Vector], None]] = []
         self.restart_video_capture = False
         self.mediapipe_hands = mp.solutions.hands.Hands(max_num_hands=1)
@@ -26,36 +26,32 @@ class WebcamControl(LogHolder):
             return None
 
         self.log.info("starting video capture")
-        if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):
+        if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM
+                or not self.config.capture_source_url.value.endswith(".jpg")):
             setup_result = self.start_video_capture_stream()
             if setup_result is not None:
                 return setup_result
-        else:
-            self.fps = self.config.capture_fps.value
 
         pause_in_millis = int(1000 / self.fps)
 
         self.log.info("starting video capture analysis loop")
         # LOOP START
         while self.config.running.value and (not self.restart_video_capture):
-            ret = False
-            frame = None
-            if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):
+            if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM
+                    or not self.config.capture_source_url.value.endswith(".jpg")):
                 ret, frame = self.cap.read()
-            elif (self.config.capture_source.value == VideoCaptureSource.IP_WEBCAM):
+            else:
                 try:
                     img_resp = urllib.request.urlopen(self.config.capture_source_url.value)
                     img_np = np.array(bytearray(img_resp.read()), dtype=np.uint8)
                     frame = cv2.imdecode(img_np, -1)
                     h, w, c = frame.shape
                     self.actual_capture_size = Vector(w, h)
-                    ret = True
                 except Exception:
                     self.log.exception("Could not access frame from URL")
                     return f"Could not access frame from URL: {self.config.capture_source_url.value}"
 
-            if ret:
-                self.process_frame(frame)
+            self.process_frame(frame)
 
             cv2.waitKey(pause_in_millis)
         # LOOP END
@@ -78,22 +74,16 @@ class WebcamControl(LogHolder):
             if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):
                 self.cap = cv2.VideoCapture(self.config.capture_device_index.value)
             elif (self.config.capture_source_url.value):
-                return None
-            # TODO: Use MJPEG video stream
+                # Check available video backends
+                availableBackends = [cv2.videoio_registry.getBackendName(b) for b in cv2.videoio_registry.getBackends()]
+                self.log.info(f"available video backends: {availableBackends}")
 
-            #     # Check available video backends
-            #     availableBackends = [cv2.videoio_registry.getBackendName(b) for b in cv2.videoio_registry.getBackends()]
-            #     self.log.info(availableBackends)
-            #     if 'CV_MJPEG' not in availableBackends:
-            #         raise Exception("MJPEG video stream not supported on this computer")
-            #
-            #     self.log.info(f"cv2.CAP_OPENCV_MJPEG: {cv2.CAP_OPENCV_MJPEG}")
-            #
-            #     cap = cv2.VideoCapture()
-            #     cap.open(self.config.capture_source_url.value, cv2.CAP_OPENCV_MJPEG)
-            #     self.log.info(f"Video stream of '{self.config.capture_source_url.value}' opened: {cap.isOpened()}")
-            # else:
-            #     raise Exception("IP Webcam URL not set")
+                self.cap = cv2.VideoCapture(self.config.capture_source_url.value)
+                self.log.info(f"Video stream of '{self.config.capture_source_url.value}' opened: {self.cap.isOpened()}")
+                if (not self.cap.isOpened()):
+                    return f"Video stream of '{self.config.capture_source_url.value}' not open"
+            else:
+                raise Exception("IP Webcam URL not set")
         except Exception as e:
             error_message = f"Failed to start video capture: {str(e)}. Please restart."
             self.log.exception(error_message)
@@ -104,9 +94,10 @@ class WebcamControl(LogHolder):
         self.log.info(f"default video capture size of camera: {default_capture_width}x{default_capture_height}")
 
         # configure video capture
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.capture_size.value.x)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.capture_size.value.y)
-        self.cap.set(cv2.CAP_PROP_FPS, self.config.capture_fps.value)
+        if self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM:
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.capture_size.value.x)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.capture_size.value.y)
+            self.cap.set(cv2.CAP_PROP_FPS, self.config.capture_fps.value)
 
         # check video capture configuration was successful
         width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -129,6 +120,10 @@ class WebcamControl(LogHolder):
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
         if (self.fps == 0):
             return "FPS of video is zero"
+        if (self.fps > 30):
+            self.log.info(f"Unexpected high FPS: {self.fps}. Assuming 30 instead.")
+            self.fps = 30
+        self.config.capture_fps.value = self.fps
 
         self.log.info(f"Capturing video (width: {width}, height: {height}, fps: {self.fps})")
 
