@@ -21,6 +21,7 @@ class ShortcutsConfigTab(QWidget, LogHolder):
         form_layout.addRow(new_label("Toggle Click", None), self.create_shortcut_control(self.config.toggle_control_click_shortcuts))
         form_layout.addRow(new_label("Toggle Scroll", None), self.create_shortcut_control(self.config.toggle_control_scroll_shortcuts))
         form_layout.addRow(new_label("Toggle Disable All", None), self.create_shortcut_control(self.config.toggle_all_control_disabled_shortcuts))
+        form_layout.addRow(new_label("Exit App", None), self.create_shortcut_control(self.config.exit_shortcuts))
 
         # Warning label
         label = QLabel("Parameters of this tab require a restart")
