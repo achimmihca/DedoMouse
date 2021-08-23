@@ -9,6 +9,7 @@ from .EnabledMouseActionsTab import EnabledMouseActionsTab
 from .GeometryConfigTab import GeometryConfigTab
 from .ShortcutsConfigTab import ShortcutsConfigTab
 from .LogTab import LogTab
+from .LicenseTab import LicenseTab
 
 class MainWidget(QWidget, LogHolder):
     def __init__(self, config: Config, close_callback: Callable) -> None:
@@ -41,3 +42,4 @@ class MainWidget(QWidget, LogHolder):
         self.tab_widget.addTab(GeometryConfigTab(config), "Geometry")
         self.tab_widget.addTab(ShortcutsConfigTab(config), "Shortcuts")
         self.tab_widget.addTab(LogTab(config), "Log")
+        self.tab_widget.addTab(LicenseTab(config), "License")

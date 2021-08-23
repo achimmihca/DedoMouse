@@ -1,3 +1,23 @@
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QPlainTextEdit
+from common.Config import Config
+from common.LogHolder import LogHolder
+
+class LicenseTab(QWidget, LogHolder):
+    def __init__(self, config: Config) -> None:
+        QWidget.__init__(self)
+        LogHolder.__init__(self)
+        self.config = config
+
+        text_edit = QPlainTextEdit()
+        text_edit.setReadOnly(True)
+
+        text_edit.setPlainText(self.get_license_text())
+
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(text_edit)
+
+    def get_license_text(self) -> str:
+        return """\
 MIT License
 
 Copyright (c) 2021 Andreas Achim Stange
@@ -18,4 +38,5 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+SOFTWARE.\
+"""
