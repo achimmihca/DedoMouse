@@ -49,7 +49,7 @@ class VideoConfigTab(QWidget, LogHolder):
 
         self.ip_webcam_url_text_edit = QLineEdit()
         group.layout().addRow(new_label("URL",
-                                        "URL to access the IP Camera's video stream. Expects a video in MJPEG format"),
+                                        "URL to access the IP Camera's video stream.\nExpects a video stream in RTSP or MJPEG format or a JPG file."),
                               self.ip_webcam_url_text_edit)
 
         self.config.capture_source_url.subscribe_and_run(lambda new_value: self.ip_webcam_url_text_edit.setText(new_value))
