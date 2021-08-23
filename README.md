@@ -8,7 +8,7 @@ For available mouse actions and the corresponding hand gestures see [here](https
 Feel free to suggest questions, ideas and issues on [GitHub](https://github.com/achimmihca/DedoMouse/issues).
 
 ## Development
-You are also encouraged to contribute code.
+You are encouraged to contribute code.
 The following explains how to set up a development environment.
 
 ### Python Setup
