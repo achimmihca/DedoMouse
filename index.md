@@ -98,6 +98,15 @@ All recognized gestures are logged even if mouse control is disabled.
 You can close the app anytime via keyboard shortcut `Ctrl+Shift+Alt+Escape`.
 All shortcuts are configurable.
 
+## Video Streams of IP Webcam
+DedoMouse supports video streams in RTSP or MJPEG format as well as an integrated webcam or USB webcam.<br />
+Further, JPG images can be used directly.
+
+Therefor, the URL must end with ".jpg" or ".mjpeg" respectively.
+
+For example, the video stream of free [IP Webcam app](https://play.google.com/store/apps/details?id=com.pas.webcam)
+for Android is compatible with DedoMouse.
+
 ## How it works
 DedoMouse uses the hand and finger tracking of Google's [MediaPipe](https://google.github.io/mediapipe/solutions/hands).
 
