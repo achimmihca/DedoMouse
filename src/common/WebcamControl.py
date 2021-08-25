@@ -107,13 +107,13 @@ class WebcamControl(LogHolder):
         if (width == 0 or height == 0):
             return "Width or height of video is zero"
 
-        if (self.config.capture_source == VideoCaptureSource.INTEGRATED_WEBCAM
+        if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM
                 and (self.config.capture_size.value.x != width
                      or self.config.capture_size.value.y != height)):
             self.log.warning(f"Configured video size {self.config.capture_size.value.x}x{self.config.capture_size.value.y} does not match actual video size {width}x{height}")
             self.config.capture_size.value = self.actual_capture_size
 
-        if (self.config.capture_source == VideoCaptureSource.INTEGRATED_WEBCAM
+        if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM
                 and self.config.capture_fps.value != self.fps):
             self.log.warning(f"Configured frames per second {self.config.capture_fps.value} does not match actual frames per second {self.fps}")
 
@@ -134,7 +134,7 @@ class WebcamControl(LogHolder):
         frame = cv2.flip(frame, 1)
 
         # Convert to RBG Color Space
-        if self.config.capture_source == VideoCaptureSource.INTEGRATED_WEBCAM:
+        if self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM:
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         else:
             frame_rgb = frame
