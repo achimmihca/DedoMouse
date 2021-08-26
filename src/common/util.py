@@ -12,6 +12,22 @@ def get_time_ms() -> int:
     return time.time_ns() // 1_000_000 
 
 #############################################
+# Number Utils
+def limit_int(current_value: int, min_value: int, max_value: int) -> int:
+    if (current_value < min_value):
+        return min_value
+    if (current_value > max_value):
+        return max_value
+    return current_value
+
+def limit_float(current_value: float, min_value: float, max_value: float) -> float:
+    if (current_value < min_value):
+        return min_value
+    if (current_value > max_value):
+        return max_value
+    return current_value
+
+#############################################
 # JSON Utils
 def to_json(obj: Any, pretty_print: bool = False) -> str:
     indent = 4 if pretty_print else None

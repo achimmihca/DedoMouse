@@ -77,6 +77,17 @@ class MainWindow(QMainWindow, LogHolder):
         self.config.screen_size.subscribe_and_run(lambda new_value: monitor_size_label.setText(f"Monitor size: {new_value.x}x{new_value.y}"))
         self.statusBar().addWidget(monitor_size_label)
 
+        self.jitter_pause_label = QLabel(f"")
+        self.statusBar().addWidget(self.jitter_pause_label)
+        self.webcam_control.gesture_recognizer.jitter_pause_time_ms.subscribe_and_run(lambda new_value: self.update_jitter_pause_label(float(new_value)))
+
+    def update_jitter_pause_label(self, new_jitter_pause_time_ms: float) -> None:
+        if (new_jitter_pause_time_ms <= 0):
+            self.jitter_pause_label.setText("")
+        else:
+            new_jitter_pause_time_seconds = new_jitter_pause_time_ms / 1000
+            self.jitter_pause_label.setText(f"Pause: {new_jitter_pause_time_seconds:.1} s")
+
     def update_capture_size_label(self, new_value: Any) -> None:
         self.capture_size_label.setText(f"Video: {self.webcam_control.actual_capture_size.x}x{self.webcam_control.actual_capture_size.y}@{self.webcam_control.fps}")
 

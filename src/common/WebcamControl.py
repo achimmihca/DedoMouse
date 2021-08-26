@@ -1,6 +1,5 @@
 from typing import Any, Callable, List, Union
 from cv2 import cv2
-import mediapipe as mp # type: ignore
 import numpy as np
 import urllib.request
 from .Config import Config
@@ -16,10 +15,9 @@ class WebcamControl(LogHolder):
         self.config = config
         self.actual_capture_size = self.config.capture_size.value
         self.fps = self.config.capture_fps.value
-        self.gesture_regocnizer = gesture_regocnizer
+        self.gesture_recognizer = gesture_regocnizer
         self.frame_analyzed_callbacks: List[Callable[[Any, Vector], None]] = []
         self.restart_video_capture = False
-        self.mediapipe_hands = mp.solutions.hands.Hands(max_num_hands=1)
 
     def start_video_capture(self) -> Union[str, None]:
         if not self.config.running.value:
@@ -143,11 +141,8 @@ class WebcamControl(LogHolder):
         self.draw_motion_border_overlay(frame)
 
         # Analyze image
-        results = self.mediapipe_hands.process(frame_rgb)
-        if results.multi_hand_landmarks and len(results.multi_hand_landmarks) > 0:
-            hand_finger_positions = self.gesture_regocnizer.process_hand_landmarks(frame, results.multi_hand_landmarks)
-
-            # Draw finger positions overlay
+        hand_finger_positions = self.gesture_recognizer.process_frame(frame_rgb)
+        if hand_finger_positions:
             self.draw_finger_position_overlay(frame, hand_finger_positions)
 
         for callback in self.frame_analyzed_callbacks:

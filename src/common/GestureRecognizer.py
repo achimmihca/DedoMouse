@@ -1,12 +1,14 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Any, List
+from typing import Any, List, Union
 from itertools import chain
 from cv2 import cv2
+import mediapipe # type: ignore
 from .LogHolder import LogHolder
-from .util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except
+from .util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except, limit_float
 from .MouseControl import MouseButton, MouseControl
 from .Config import Config
+from .ReactiveProperty import ReactiveProperty
 from .Vector import Vector
 
 class GestureRecognizer(LogHolder):
@@ -21,6 +23,9 @@ class GestureRecognizer(LogHolder):
         super().__init__()
         self.config = config
         self.mouse_control = mouse_control
+
+        self.mediapipe_hands = mediapipe.solutions.hands.Hands(max_num_hands=1)
+
         self.last_left_click_time_ms = 0
         self.last_right_click_time_ms = 0
         self.last_middle_click_time_ms = 0
@@ -38,6 +43,27 @@ class GestureRecognizer(LogHolder):
         self.start_scroll_time_ms = 0
         self.was_thumb_up_last_frame = False
         self.was_thumb_down_last_frame = False
+
+        # The time is increased if in a frame there were no mouse or remarkable jitter in the finger tracking.
+        # Then this duration is waited until finger tracking is stable again.
+        self.jitter_pause_time_ms = ReactiveProperty(0.0)
+        self.last_frame_analysis_time_ms = get_time_ms()
+
+    def process_frame(self, frame_rgb: Any) -> Union[HandFingerPositions, None]:
+        hand_finger_positions = None
+        mediapipe_results = self.mediapipe_hands.process(frame_rgb)
+        delta_time_ms = get_time_ms() - self.last_frame_analysis_time_ms
+        if mediapipe_results.multi_hand_landmarks and len(mediapipe_results.multi_hand_landmarks) > 0:
+            if (self.jitter_pause_time_ms.value > 0):
+                # ignore finger positions until it is more stable
+                self.jitter_pause_time_ms.value = self.jitter_pause_time_ms.value - delta_time_ms
+            else:
+                hand_finger_positions = self.process_hand_landmarks(frame_rgb, mediapipe_results.multi_hand_landmarks)
+        else:
+            self.jitter_pause_time_ms.value = limit_float(self.jitter_pause_time_ms.value + (delta_time_ms * 3), 0, self.config.max_jitter_pause_time_ms.value)
+
+        self.last_frame_analysis_time_ms = get_time_ms()
+        return hand_finger_positions
 
     def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> HandFingerPositions:
         # find landmark positions

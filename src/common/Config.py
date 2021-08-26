@@ -50,7 +50,7 @@ class Config:
         self.mouse_position_pid_d = ReactiveProperty(0.01)
 
         # Distance percent of capture_size.
-        self.click_distance_threshold_low_percent = ReactiveProperty(0.06)
+        self.click_distance_threshold_low_percent = ReactiveProperty(0.05)
         self.click_distance_threshold_high_percent = ReactiveProperty(self.click_distance_threshold_low_percent.value * 1.5)
         # Min time between two single click gestures.
         self.single_click_pause_ms = ReactiveProperty(600)
@@ -79,6 +79,8 @@ class Config:
         self.toggle_all_control_disabled_shortcuts = ReactiveProperty(["ctrl+shift+alt+a", "f2"])
 
         self.window_size = ReactiveProperty(Vector(480, 320))
+
+        self.max_jitter_pause_time_ms = ReactiveProperty(800)
 
     def enable_logging_on_value_change(self) -> None:
         for k, v in self.__dict__.items():
