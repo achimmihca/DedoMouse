@@ -56,7 +56,7 @@ class Config:
         self.single_click_pause_ms = ReactiveProperty(600)
         # Max time between two single click gestures for triggering a double click.
         # A double click is fired when two click gestures are detected with less time between them.
-        self.double_click_max_pause_ms = ReactiveProperty(400)
+        self.double_click_max_pause_ms = ReactiveProperty(500)
         # Wait time before changing to continued scroll mode.
         self.continued_scroll_mode_delay_ms = ReactiveProperty(1200)
         # Min time between two scroll events in continued scroll mode.
@@ -68,7 +68,6 @@ class Config:
         self.is_control_click = ReactiveProperty(False)
         self.is_control_scroll = ReactiveProperty(False)
         self.is_all_control_disabled = ReactiveProperty(False)
-        self.is_trigger_additional_click_on_double_click = ReactiveProperty(False)
 
         self.is_stay_on_top = ReactiveProperty(False)
 

@@ -1,4 +1,6 @@
 from __future__ import annotations
+import threading
+import time
 import mouse # type: ignore
 from enum import Enum
 from .Config import Config
@@ -33,6 +35,7 @@ class MouseControl(LogHolder):
         self.mouse_y_pid_control = PidControl(p, i, d)
         self.last_mouse_position_time_ms = get_time_ms()
         self.is_drag_started = False
+        self.last_single_left_click_time_ms = 0
 
     def on_new_mouse_position_detected(self, new_mouse_px: Vector) -> None:
         if self.config.is_control_mouse_position.value and not self.config.is_all_control_disabled.value:
@@ -49,6 +52,9 @@ class MouseControl(LogHolder):
             return
 
         if self.config.is_control_click.value and not self.config.is_all_control_disabled.value:
+            if mouse_button == MouseButton.LEFT:
+                self.last_single_left_click_time_ms = get_time_ms()
+
             self.do_click(mouse_button)
             self.log.info(f"{mouse_button.name} click")
         else:
@@ -60,12 +66,22 @@ class MouseControl(LogHolder):
             return
 
         if self.config.is_control_click.value and not self.config.is_all_control_disabled.value:
-            self.do_click(MouseButton.LEFT)
-            if self.config.is_trigger_additional_click_on_double_click.value:
+            duration_since_last_single_click = get_time_ms() - self.last_single_left_click_time_ms
+            if (duration_since_last_single_click < 500):
+                # Wait a little bit such that the OS will take the following two clicks as a double click and not as a triple click.
+                do_double_click_thread = threading.Thread(target=lambda: self.do_double_click_after_sleep_in_ms(500 - duration_since_last_single_click))
+                do_double_click_thread.start()
+            else:
+                self.do_click(MouseButton.LEFT)
                 self.do_click(MouseButton.LEFT)
             self.log.info("double left click")
         else:
             self.log.info("double left click, but ignored")
+
+    def do_double_click_after_sleep_in_ms(self, sleep_time_ms: int) -> None:
+        time.sleep(sleep_time_ms / 1000)
+        self.do_click(MouseButton.LEFT)
+        self.do_click(MouseButton.LEFT)
 
     def on_begin_drag(self) -> None:
         if self.is_drag_started:

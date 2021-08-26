@@ -34,7 +34,6 @@ class EnabledMouseActionsTab(QWidget, LogHolder):
         group = QGroupBox("Misc.")
         group.setLayout(QVBoxLayout())
 
-        group.layout().addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_trigger_additional_click_on_double_click=}", "Trigger additional click on double-click"))
         group.layout().addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_stay_on_top=}", "Stay on top"))
 
         return group
