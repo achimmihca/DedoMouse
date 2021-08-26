@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGroupBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QGridLayout
 from common.Config import Config
 from common.LogHolder import LogHolder
 from .ConfigVariableCheckBox import ConfigVariableCheckBox
@@ -15,25 +15,21 @@ class EnabledMouseActionsTab(QWidget, LogHolder):
 
     def create_enabled_mouse_action_controls(self) -> QWidget:
         group = QGroupBox("Mouse Control")
-        group.setLayout(QVBoxLayout())
+        grid_layout = QGridLayout()
+        group.setLayout(grid_layout)
 
-        row1_layout = QHBoxLayout()
-        group.layout().addLayout(row1_layout)
-        row2_layout = QHBoxLayout()
-        group.layout().addLayout(row2_layout)
-
-        row1_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_control_mouse_position=}", "Position"))
-        row1_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_control_click=}", "Click"))
-        row1_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_control_scroll=}", "Scroll"))
-
-        row2_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_all_control_disabled=}", "Disable all"))
+        grid_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_control_mouse_position=}", "Position"), 0, 0)
+        grid_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_control_click=}", "Click"), 0, 1)
+        grid_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_control_scroll=}", "Scroll"), 0, 2)
+        grid_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_all_control_disabled=}", "Disable all"), 1, 0)
 
         return group
 
     def create_other_controls(self) -> QWidget:
         group = QGroupBox("Misc.")
-        group.setLayout(QVBoxLayout())
+        grid_layout = QGridLayout()
+        group.setLayout(grid_layout)
 
-        group.layout().addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_stay_on_top=}", "Stay on top"))
+        grid_layout.addWidget(ConfigVariableCheckBox(self.config, f"{self.config.is_stay_on_top=}", "Stay on top"), 0, 0)
 
         return group

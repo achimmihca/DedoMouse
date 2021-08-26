@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QComboBox, QSpinBox, QGroupBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QComboBox, QSpinBox, QGroupBox, QGridLayout
 from common.Config import Config
 from common.LogHolder import LogHolder
 from common.Vector import Vector
@@ -17,12 +17,14 @@ class MonitorConfigTab(QWidget, LogHolder):
 
     def create_monitor_size_group(self) -> QWidget:
         group = QGroupBox("Monitor Size")
-        group.setLayout(QFormLayout())
+        form_layout = QFormLayout()
+        group.setLayout(form_layout)
 
         # Monitor selection control
         self.monitor_combo = QComboBox()
-        group.layout().addRow(new_label("Target Monitor", "The monitor on which the mouse will be positioned"),
-                                      self.monitor_combo)
+        form_layout.addRow(new_label("Target Monitor", "The monitor on which the mouse will be positioned"),
+                           self.monitor_combo)
+
         monitors = get_monitors()
         for index, monitor in enumerate(monitors):
             self.monitor_combo.addItem(monitor.name, index)
@@ -32,11 +34,11 @@ class MonitorConfigTab(QWidget, LogHolder):
 
         # Size selection controls
         self.monitor_size_x_spinner = MonitorDimensionSpinBox()
+        form_layout.addRow(new_label("Width (Pixels)", "Horizontal size of the monitor in pixels"),
+                           self.monitor_size_x_spinner)
         self.monitor_size_y_spinner = MonitorDimensionSpinBox()
-        group.layout().addRow(new_label("Size X (Pixels)", "Horizontal size of the monitor in pixels"),
-                              self.monitor_size_x_spinner)
-        group.layout().addRow(new_label("Size Y (Pixels)", "Vertical size of the monitor in pixels"),
-                              self.monitor_size_y_spinner)
+        form_layout.addRow(new_label("Height (Pixels)", "Vertical size of the monitor in pixels"),
+                           self.monitor_size_y_spinner)
 
         self.config.screen_size.subscribe_and_run(self.update_controls_of_screen_size)
         self.monitor_size_x_spinner.valueChanged.connect(self.update_config_by_screen_size)
@@ -46,13 +48,14 @@ class MonitorConfigTab(QWidget, LogHolder):
 
     def create_monitor_offset_group(self) -> QWidget:
         group = QGroupBox("Monitor Offset")
-        group.setLayout(QFormLayout())
+        form_layout = QFormLayout()
+        group.setLayout(form_layout)
 
         self.monitor_offset_x_spinner = MonitorDimensionSpinBox()
         self.monitor_offset_y_spinner = MonitorDimensionSpinBox()
-        group.layout().addRow(new_label("Offset X (Pixels)", "Sum of all monitor widths that are left of the target monitor"),
+        form_layout.addRow(new_label("Offset X (Pixels)", "Sum of all monitor widths that are left of the target monitor"),
                               self.monitor_offset_x_spinner)
-        group.layout().addRow(new_label("Offset Y (Pixels)", "Sum of all monitor heights that are below the target monitor"),
+        form_layout.addRow(new_label("Offset Y (Pixels)", "Sum of all monitor heights that are below the target monitor"),
                               self.monitor_offset_y_spinner)
 
         self.config.screen_offset.subscribe_and_run(self.update_controls_of_screen_offset)
