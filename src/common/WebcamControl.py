@@ -129,7 +129,8 @@ class WebcamControl(LogHolder):
 
     def process_frame(self, frame: Any) -> None:
         # mirror vertically
-        frame = cv2.flip(frame, 1)
+        if self.config.capture_flip.value:
+            frame = cv2.flip(frame, 1)
 
         # Convert to RBG Color Space
         if self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM:

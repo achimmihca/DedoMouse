@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QFormLayout, QGroupBox, QSpinBox, QLabel, QRadioButton, QLineEdit, QLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QFormLayout, QGroupBox, QSpinBox, QLabel, QRadioButton, QLineEdit, QLayout, QCheckBox
 from common.Config import Config
 from common.Config import VideoCaptureSource
 from common.LogHolder import LogHolder
@@ -16,6 +16,14 @@ class VideoConfigTab(QWidget, LogHolder):
         grid_layout = QGridLayout()
         self.setLayout(grid_layout)
 
+        # Flip image vertically
+        flip_checkbox = QCheckBox()
+        flip_checkbox.setText("Flip image")
+        self.config.capture_flip.subscribe_and_run(lambda new_value: flip_checkbox.setChecked(new_value))
+        flip_checkbox.stateChanged.connect(lambda new_value: self.config.capture_flip.set_value(new_value != 0)) # type: ignore
+
+        grid_layout.addWidget(flip_checkbox)
+
         # Internal camera
         self.internal_webcam_button = QRadioButton("Integrated Webcam")
         self.internal_webcam_button.setToolTip("Specifies that an integrated or otherwise connected (e.g. via USB) webcam should be used.")
@@ -23,7 +31,7 @@ class VideoConfigTab(QWidget, LogHolder):
 
         # Capture size and FPS
         internal_webcam_form_layout = QFormLayout()
-        grid_layout.addLayout(internal_webcam_form_layout, 1, 0)
+        grid_layout.addLayout(internal_webcam_form_layout, 2, 0)
         self.add_capture_size_widgets(internal_webcam_form_layout)
 
         # Device number
@@ -40,11 +48,11 @@ class VideoConfigTab(QWidget, LogHolder):
         # IP Camera
         self.ip_webcam_button = QRadioButton("IP Camera")
         self.ip_webcam_button.setToolTip("Specifies that a video stream from an IP camera should be used (e.g. from a smartphone).")
-        grid_layout.addWidget(self.ip_webcam_button, 2, 0)
+        grid_layout.addWidget(self.ip_webcam_button, 3, 0)
 
         # IP Camera URL
         ip_camera_form_layout = QFormLayout()
-        grid_layout.addLayout(ip_camera_form_layout, 3, 0)
+        grid_layout.addLayout(ip_camera_form_layout, 4, 0)
         self.ip_webcam_url_text_edit = QLineEdit()
         ip_camera_form_layout.addRow(new_label("URL",
                                      "URL to access the IP Camera's video stream.\nExpects a video stream in RTSP or MJPEG format or a JPG file."),
@@ -61,7 +69,7 @@ class VideoConfigTab(QWidget, LogHolder):
         label = QLabel("Parameters of this tab require a restart")
         label.setAlignment(Qt.AlignCenter)
         label.setProperty("cssClass", "highlight") # type: ignore
-        grid_layout.addWidget(label, 4, 0)
+        grid_layout.addWidget(label, 5, 0)
 
     def update_config_by_internal_webcam_button(self, is_checked: bool) -> None:
         if is_checked:

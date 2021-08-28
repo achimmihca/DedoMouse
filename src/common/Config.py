@@ -37,6 +37,7 @@ class Config:
         self.capture_device_index = ReactiveProperty(0)
         self.capture_source = ReactiveProperty(VideoCaptureSource.INTEGRATED_WEBCAM)
         self.capture_source_url = ReactiveProperty("http://192.168.1.1:4444/shot.jpg")
+        self.capture_flip = ReactiveProperty(True)
 
         # Motion does not (cannot) use the full capture range
         self.motion_border_left = ReactiveProperty(0.15)
