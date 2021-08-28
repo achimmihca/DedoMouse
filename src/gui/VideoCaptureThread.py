@@ -39,8 +39,7 @@ class VideoCaptureThread(QThread):
             scale_y = label_height / frame_size.y
             scale = min(scale_x, scale_y)
             frame = cv2.resize(frame, None, fx=scale, fy=scale)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = QImage(frame, frame.shape[1], frame.shape[0], 
+            image = QImage(frame, frame.shape[1], frame.shape[0],
                         frame.strides[0], QImage.Format_RGB888)
             self.video_display_label.setPixmap(QPixmap.fromImage(image))
         except Exception:

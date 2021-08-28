@@ -6,6 +6,7 @@ from cv2 import cv2
 import mediapipe # type: ignore
 from .LogHolder import LogHolder
 from .util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except, limit_float
+from .draw_util import put_text
 from .MouseControl import MouseButton, MouseControl
 from .Config import Config
 from .ReactiveProperty import ReactiveProperty
@@ -49,16 +50,16 @@ class GestureRecognizer(LogHolder):
         self.jitter_pause_time_ms = ReactiveProperty(0.0)
         self.last_frame_analysis_time_ms = get_time_ms()
 
-    def process_frame(self, frame_rgb: Any) -> Union[HandFingerPositions, None]:
+    def process_frame(self, frame: Any) -> Union[HandFingerPositions, None]:
         hand_finger_positions = None
-        mediapipe_results = self.mediapipe_hands.process(frame_rgb)
+        mediapipe_results = self.mediapipe_hands.process(frame)
         delta_time_ms = get_time_ms() - self.last_frame_analysis_time_ms
         if mediapipe_results.multi_hand_landmarks and len(mediapipe_results.multi_hand_landmarks) > 0:
             if (self.jitter_pause_time_ms.value > 0):
                 # ignore finger positions until it is more stable
                 self.jitter_pause_time_ms.value = self.jitter_pause_time_ms.value - delta_time_ms
             else:
-                hand_finger_positions = self.process_hand_landmarks(frame_rgb, mediapipe_results.multi_hand_landmarks)
+                hand_finger_positions = self.process_hand_landmarks(frame, mediapipe_results.multi_hand_landmarks)
         else:
             self.jitter_pause_time_ms.value = limit_float(self.jitter_pause_time_ms.value + (delta_time_ms * 3), 0, self.config.max_jitter_pause_time_ms.value)
 
@@ -98,9 +99,9 @@ class GestureRecognizer(LogHolder):
         mouse_x = int(self.config.screen_offset.value.x + self.config.screen_size.value.x * pos_percent_x)
         mouse_y = int(self.config.screen_offset.value.y + self.config.screen_size.value.y * pos_percent_y)
 
-        screen_pos_px = screen_pos_percent.scale(self.config.capture_size.value).add(Vector(10, 10)).to_int_vector()
+        screen_pos_px = screen_pos_percent.scale(self.config.capture_size.value).add(Vector(10, 10))
         pos_text = f"{pos_percent_x * 100:.0f}% ({mouse_x}px) | {pos_percent_y * 100:.0f}% ({mouse_y}px)"
-        cv2.putText(frame, pos_text, screen_pos_px.to_tuple_2(), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1.5, (255, 255, 255), 2)
+        put_text(frame, pos_text, screen_pos_px, 1.5, (255, 255, 255), 2)
         
         return Vector(mouse_x, mouse_y, 0)
 

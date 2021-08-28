@@ -27,11 +27,6 @@ class MainWidget(QWidget, LogHolder):
         self.image_label.setMinimumSize(QSize(int(160), int(120)))
         self.main_layout.addWidget(self.image_label, 1)
 
-        # Quit button
-        self.quit_button = QPushButton("Quit")
-        self.quit_button.clicked.connect(self.close_callback)
-        self.main_layout.addWidget(self.quit_button)
-
         # Tabs for configuration
         self.tab_widget = QTabWidget()
         self.main_layout.addWidget(self.tab_widget)

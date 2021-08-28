@@ -133,15 +133,13 @@ class WebcamControl(LogHolder):
 
         # Convert to RBG Color Space
         if self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM:
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        else:
-            frame_rgb = frame
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Draw some certain configurable values
         self.draw_motion_border_overlay(frame)
 
         # Analyze image
-        hand_finger_positions = self.gesture_recognizer.process_frame(frame_rgb)
+        hand_finger_positions = self.gesture_recognizer.process_frame(frame)
         if hand_finger_positions:
             self.draw_finger_position_overlay(frame, hand_finger_positions)
 
@@ -175,7 +173,7 @@ class WebcamControl(LogHolder):
         draw_circle(frame, hand_finger_positions.index_tip_position.px, 5, (255, 255, 0))
         draw_circle(frame, hand_finger_positions.middle_tip_position.px, 5, (0, 255, 0))
         draw_circle(frame, hand_finger_positions.ring_tip_position.px, 5, (255, 0, 255))
-        draw_circle(frame, hand_finger_positions.pinky_tip_position.px, 5, (255, 255, 255))
+        draw_circle(frame, hand_finger_positions.pinky_tip_position.px, 5, (0, 0, 255))
 
         # draw click threshold
         draw_circle(frame, hand_finger_positions.thumb_tip_position.px, self.config.click_distance_threshold_low_percent.value * self.actual_capture_size.x / 2, (0, 255, 0), 2)
