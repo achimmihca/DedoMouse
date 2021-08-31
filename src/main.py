@@ -3,6 +3,7 @@ import logging
 import sys
 
 from PySide6.QtWidgets import QApplication
+from qt_material import apply_stylesheet
 from common.Config import Config
 from common.ConfigJsonHandler import ConfigJsonHandler
 from gui.MainWindow import MainWindow
@@ -12,7 +13,6 @@ from common.WebcamControl import WebcamControl
 from common.GestureRecognizer import GestureRecognizer
 from common.GlobalShortcutControl import GlobalShortcutControl
 from common.version import version
-
 init_logging()
 logging.getLogger('root').info("=============================================")
 logging.getLogger('root').info(f"DedoMouse {version} started")
@@ -31,6 +31,9 @@ gesture_regocnizer = GestureRecognizer(config, mouse_control)
 webcam_control = WebcamControl(config, gesture_regocnizer)
 
 app = QApplication(sys.argv)
+apply_stylesheet(app, theme=config.ui_theme.value)
+config.ui_theme.subscribe(lambda new_theme: apply_stylesheet(app, theme=new_theme))
+
 win = MainWindow(config, webcam_control)
 
 shortcut_control = GlobalShortcutControl(config, win.close)

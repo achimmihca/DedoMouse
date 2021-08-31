@@ -11,3 +11,4 @@ pylint==2.9.3
 mypy==0.910
 pyinstaller==4.5.1
 urllib3==1.26.6
+qt-material==2.8.8
