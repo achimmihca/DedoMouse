@@ -5,8 +5,6 @@ import sys
 logging_format = '%(asctime)s - %(levelname)s - %(name)s.%(funcName)s - %(message)s'
 
 def init_logging() -> None:
-    global logging_format
-
     log = logging.getLogger("initLoggingLogger")
     log.info("initializing logging")
 

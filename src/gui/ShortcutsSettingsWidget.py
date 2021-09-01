@@ -5,17 +5,24 @@ from common.Config import Config
 from common.ReactiveProperty import ReactiveProperty
 from common.LogHolder import LogHolder
 from .qt_util import new_label
+from .RequireAppRestartLabel import RequireAppRestartLabel
 
-class ShortcutsConfigTab(QWidget, LogHolder):
+class ShortcutsSettingsWidget(QWidget, LogHolder):
     def __init__(self, config: Config) -> None:
         QWidget.__init__(self)
         LogHolder.__init__(self)
         self.config = config
+
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
 
+        group = QGroupBox("Shortcuts")
+        group_layout = QVBoxLayout()
+        group.setLayout(group_layout)
+        main_layout.addWidget(group)
+
         form_layout = QFormLayout()
-        main_layout.addLayout(form_layout)
+        group_layout.addLayout(form_layout)
 
         form_layout.addRow(new_label("Toggle Position", None), self.create_shortcut_control(self.config.toggle_control_mouse_position_shortcuts))
         form_layout.addRow(new_label("Toggle Click", None), self.create_shortcut_control(self.config.toggle_control_click_shortcuts))
@@ -23,11 +30,8 @@ class ShortcutsConfigTab(QWidget, LogHolder):
         form_layout.addRow(new_label("Toggle Disable All", None), self.create_shortcut_control(self.config.toggle_all_control_disabled_shortcuts))
         form_layout.addRow(new_label("Exit App", None), self.create_shortcut_control(self.config.exit_shortcuts))
 
-        # Warning label
-        label = QLabel("Parameters of this tab require a restart")
-        label.setAlignment(Qt.AlignCenter)
-        label.setProperty("cssClass", "highlight")  # type: ignore
-        self.layout().addWidget(label)
+        # Restart hint
+        group_layout.addWidget(RequireAppRestartLabel())
 
     def create_shortcut_control(self, reactive_property: ReactiveProperty[List[str]]) -> QLineEdit:
         text_edit = QLineEdit()

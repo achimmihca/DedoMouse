@@ -125,6 +125,8 @@ class WebcamControl(LogHolder):
 
         self.log.info(f"Capturing video (width: {width}, height: {height}, fps: {self.fps})")
 
+        self.gesture_recognizer.actual_capture_size = self.actual_capture_size
+
         return None
 
     def process_frame(self, frame: Any) -> None:

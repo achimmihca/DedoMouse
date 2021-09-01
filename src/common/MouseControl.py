@@ -3,6 +3,7 @@ import threading
 import time
 import mouse # type: ignore
 from enum import Enum
+from rx.subject.subject import Subject
 from .Config import Config
 from .LogHolder import LogHolder
 from .PidControl import PidControl
@@ -37,6 +38,11 @@ class MouseControl(LogHolder):
         self.is_drag_started = False
         self.last_single_left_click_time_ms = 0
 
+        self.performed_action_desciption = Subject()
+
+        # Log all performed actions
+        self.performed_action_desciption.subscribe(lambda new_value: self.log.info(new_value))
+
     def on_new_mouse_position_detected(self, new_mouse_px: Vector) -> None:
         if self.config.is_control_mouse_position.value and not self.config.is_all_control_disabled.value:
             delta_time_seconds = (get_time_ms() - self.last_mouse_position_time_ms) / 1000
@@ -48,7 +54,7 @@ class MouseControl(LogHolder):
 
     def on_single_click_detected(self, mouse_button: MouseButton) -> None:
         if self.is_drag_started:
-            self.log.info(f"{mouse_button.name} click, but ongoing drag")
+            self.performed_action_desciption.on_next(f"{mouse_button.name.lower()} click, but ongoing drag")
             return
 
         if self.config.is_control_click.value and not self.config.is_all_control_disabled.value:
@@ -56,13 +62,13 @@ class MouseControl(LogHolder):
                 self.last_single_left_click_time_ms = get_time_ms()
 
             self.do_click(mouse_button)
-            self.log.info(f"{mouse_button.name} click")
+            self.performed_action_desciption.on_next(f"{mouse_button.name.lower()} click")
         else:
-            self.log.info(f"{mouse_button.name} click, but ignored")
+            self.performed_action_desciption.on_next(f"{mouse_button.name.lower()} click, but ignored")
 
     def on_double_left_click_detected(self) -> None:
         if self.is_drag_started:
-            self.log.info("double click, but ongoing drag")
+            self.performed_action_desciption.on_next("double click, but ongoing drag")
             return
 
         if self.config.is_control_click.value and not self.config.is_all_control_disabled.value:
@@ -74,9 +80,9 @@ class MouseControl(LogHolder):
             else:
                 self.do_click(MouseButton.LEFT)
                 self.do_click(MouseButton.LEFT)
-            self.log.info("double left click")
+            self.performed_action_desciption.on_next("double left click")
         else:
-            self.log.info("double left click, but ignored")
+            self.performed_action_desciption.on_next("double left click, but ignored")
 
     def do_double_click_after_sleep_in_ms(self, sleep_time_ms: int) -> None:
         time.sleep(sleep_time_ms / 1000)
@@ -85,33 +91,33 @@ class MouseControl(LogHolder):
 
     def on_begin_drag(self) -> None:
         if self.is_drag_started:
-            self.log.info("begin drag but drag already started, thus ignored")
+            self.performed_action_desciption.on_next("begin drag but drag already started, thus ignored")
             return
 
         self.is_drag_started = True
         if self.config.is_control_click.value and not self.config.is_all_control_disabled.value:
             mouse.press(button=mouse.LEFT)
-            self.log.info("begin drag")
+            self.performed_action_desciption.on_next("begin drag")
         else:
-            self.log.info("begin drag but ignored")
+            self.performed_action_desciption.on_next("begin drag, but ignored")
 
     def on_end_drag(self) -> None:
         if not self.is_drag_started:
-            self.log.info("end drag but no drag started yet, thus ignored")
+            self.performed_action_desciption.on_next("end drag but no drag started yet, thus ignored")
             return
 
         self.is_drag_started = False
         if self.config.is_control_click.value and not self.config.is_all_control_disabled.value:
             mouse.release(mouse.LEFT)
-            self.log.info("end drag")
+            self.performed_action_desciption.on_next("end drag")
         else:
-            self.log.info("end drag but ignored")
+            self.performed_action_desciption.on_next("end drag but ignored")
 
     def on_scroll(self, x: int, y: int) -> None:
         scroll_direction = self.get_scroll_direction(x, y)
 
         if self.is_drag_started:
-            self.log.info(f"scroll {scroll_direction}, but ongoing drag")
+            self.performed_action_desciption.on_next(f"scroll {scroll_direction}, but ongoing drag")
             return
 
         try:
@@ -121,11 +127,11 @@ class MouseControl(LogHolder):
                     pass
                 if y != 0:
                     mouse.wheel(y)
-                self.log.info(f"scroll {scroll_direction}")
+                self.performed_action_desciption.on_next(f"scroll {scroll_direction}")
             else:
-                self.log.info(f"scroll {scroll_direction}, but ignored")
+                self.performed_action_desciption.on_next(f"scroll {scroll_direction}, but ignored")
         except Exception as e:
-            self.log.error(f"scrolling failed (horizontal:{x}, vertical:{y}): {str(e)}")
+            self.performed_action_desciption.on_next(f"scrolling failed (horizontal:{x}, vertical:{y}): {str(e)}")
 
     def do_click(self, mouse_button: MouseButton) -> None:
         if mouse_button == MouseButton.LEFT:

@@ -5,7 +5,7 @@ from common.ReactiveProperty import ReactiveProperty
 from common.LogHolder import LogHolder
 from .qt_util import new_label
 
-class GeometryConfigTab(QWidget, LogHolder):
+class GeometrySettingsWidget(QWidget, LogHolder):
     def __init__(self, config: Config) -> None:
         QWidget.__init__(self)
         LogHolder.__init__(self)
@@ -16,10 +16,10 @@ class GeometryConfigTab(QWidget, LogHolder):
         main_layout.addWidget(self.create_motion_border_control())
         main_layout.addWidget(self.create_distance_threshold_control())
 
-    def new_percent_slider(self, reactive_property: ReactiveProperty[float]) -> QSlider:
+    def new_percent_slider(self, reactive_property: ReactiveProperty[float], slider_min: int = 0, slider_max: int = 100) -> QSlider:
         slider = QSlider(Qt.Horizontal)
-        slider.setMinimum(0)
-        slider.setMaximum(100)
+        slider.setMinimum(slider_min)
+        slider.setMaximum(slider_max)
 
         def update_control_by_config(new_value: int) -> None:
             reactive_property.value = float(new_value / 100)
@@ -69,8 +69,8 @@ class GeometryConfigTab(QWidget, LogHolder):
         return group
 
     def create_distance_threshold_control(self) -> QWidget:
-        distance_low_slider = self.new_percent_slider(self.config.click_distance_threshold_low_percent)
-        distance_high_slider = self.new_percent_slider(self.config.click_distance_threshold_high_percent)
+        distance_low_slider = self.new_percent_slider(self.config.click_distance_threshold_low_percent, 1, 50)
+        distance_high_slider = self.new_percent_slider(self.config.click_distance_threshold_high_percent, 1, 50)
 
         def on_low_slider_changed() -> None:
             if (distance_low_slider.value() > distance_high_slider.value()):

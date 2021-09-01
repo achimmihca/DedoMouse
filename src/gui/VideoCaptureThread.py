@@ -27,7 +27,7 @@ class VideoCaptureThread(QThread):
             if video_capture_error_message is not None:
                 self.video_display_label.setText(video_capture_error_message)
         except Exception:
-            error_message = "Error during video capture or processing"
+            error_message = ":(\n\nError during video capture or processing.\nCheck log file for further information."
             self.log.exception(error_message)
             self.video_display_label.setText(error_message)
 

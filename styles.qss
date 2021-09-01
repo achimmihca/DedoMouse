@@ -6,3 +6,7 @@ QStatusBar QLabel {
 QLabel[cssClass=highlight] {
     color: red;
 }
+
+QToolButton:checked {
+    border-width: 5px;
+}

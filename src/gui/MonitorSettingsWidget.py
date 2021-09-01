@@ -5,15 +5,20 @@ from common.Vector import Vector
 from screeninfo import get_monitors
 from .qt_util import new_label
 
-class MonitorConfigTab(QWidget, LogHolder):
+class MonitorSettingsWidget(QWidget, LogHolder):
     def __init__(self, config: Config) -> None:
         QWidget.__init__(self)
         LogHolder.__init__(self)
         self.config = config
 
-        self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.create_monitor_size_group())
-        self.layout().addWidget(self.create_monitor_offset_group())
+        monitor_size_group = self.create_monitor_size_group()
+        monitor_offset_group = self.create_monitor_offset_group()
+
+        # Layout
+        main_layout = QVBoxLayout()
+        self.setLayout(main_layout)
+        main_layout.addWidget(monitor_size_group)
+        main_layout.addWidget(monitor_offset_group)
 
     def create_monitor_size_group(self) -> QWidget:
         group = QGroupBox("Monitor Size")

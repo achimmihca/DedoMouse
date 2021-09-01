@@ -2,7 +2,6 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, List, Union
 from itertools import chain
-from cv2 import cv2
 import mediapipe # type: ignore
 from .LogHolder import LogHolder
 from .util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except, limit_float
@@ -27,13 +26,15 @@ class GestureRecognizer(LogHolder):
 
         self.mediapipe_hands = mediapipe.solutions.hands.Hands(max_num_hands=1)
 
+        self.actual_capture_size = self.config.capture_size.value
+
         self.last_left_click_time_ms = 0
         self.last_right_click_time_ms = 0
         self.last_middle_click_time_ms = 0
         self.allow_left_click = False
         self.allow_right_click = False
         self.allow_middle_click = False
-        
+
         self.left_click_count = 0
         self.left_click_start_time_ms = 0
 
@@ -69,7 +70,7 @@ class GestureRecognizer(LogHolder):
     def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> HandFingerPositions:
         # find landmark positions
         first_hand_landmarks = multi_hand_landmarks[0]
-        hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.config.capture_size.value)
+        hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.actual_capture_size)
 
         # detect mouse position
         if (self.config.motion_border_left.value + self.config.motion_border_right.value < 1

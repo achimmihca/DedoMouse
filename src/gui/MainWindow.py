@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QLabel
 from common.version import version
 from common.Config import Config
+from common.Config import VideoCaptureSource
 from common.LogHolder import LogHolder
 from common.WebcamControl import WebcamControl
 from common.Vector import Vector
@@ -38,6 +39,10 @@ class MainWindow(QMainWindow, LogHolder):
             self.config.window_size.value = new_value
         self.resize_event_reactive_property.pipe(ops.debounce(0.1)).subscribe(update_config_window_size)
 
+    def setup_video_capture(self) -> None:
+        self.video_capture_thread = VideoCaptureThread(self.config, self.webcam_control, self.main_widget.image_label)
+        self.video_capture_thread.start()
+
     def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
         if hasattr(self, 'resize_event_reactive_property'):
@@ -59,37 +64,49 @@ class MainWindow(QMainWindow, LogHolder):
 
         self.config.is_stay_on_top.subscribe_and_run(self.update_stay_on_top)
 
-    def setup_video_capture(self) -> None:
-        self.video_capture_thread = VideoCaptureThread(self.config, self.webcam_control, self.main_widget.image_label)
-        self.video_capture_thread.start()
-
     def setup_status_bar(self) -> None:
-        global version
         version_label = QLabel(f"Version: {version}")
         self.statusBar().addWidget(version_label)
 
-        self.capture_size_label = QLabel()
-        self.config.capture_size.subscribe_and_run(self.update_capture_size_label)
-        self.config.capture_fps.subscribe_and_run(self.update_capture_size_label)
-        self.statusBar().addWidget(self.capture_size_label)
-
+        # Monitor size label
         monitor_size_label = QLabel()
         self.config.screen_size.subscribe_and_run(lambda new_value: monitor_size_label.setText(f"Monitor size: {new_value.x}x{new_value.y}"))
         self.statusBar().addWidget(monitor_size_label)
 
-        self.jitter_pause_label = QLabel(f"")
-        self.statusBar().addWidget(self.jitter_pause_label)
-        self.webcam_control.gesture_recognizer.jitter_pause_time_ms.subscribe_and_run(lambda new_value: self.update_jitter_pause_label(float(new_value)))
+        # Capture size resp. IP webcam URL label
+        self.video_settings_label = QLabel()
+        self.config.capture_size.subscribe_and_run(self.update_video_settings_label)
+        self.config.capture_fps.subscribe_and_run(self.update_video_settings_label)
+        self.config.capture_source_url.subscribe_and_run(self.update_video_settings_label)
+        self.statusBar().addWidget(self.video_settings_label)
 
-    def update_jitter_pause_label(self, new_jitter_pause_time_ms: float) -> None:
+        # Last performed action label
+        self.last_performed_action_description = ""
+        self.performed_action_description_count = 0
+        self.performed_action_description_label = QLabel()
+        self.statusBar().addWidget(self.performed_action_description_label)
+        self.webcam_control.gesture_recognizer.jitter_pause_time_ms.subscribe(lambda new_value: self.update_performed_action_description_label(float(new_value), ""))
+        self.webcam_control.gesture_recognizer.mouse_control.performed_action_desciption.subscribe(lambda new_value: self.update_performed_action_description_label(0, new_value))
+
+    def update_performed_action_description_label(self, new_jitter_pause_time_ms: float, performed_action_description: str) -> None:
         if (new_jitter_pause_time_ms <= 0):
-            self.jitter_pause_label.setText("")
+            if (self.last_performed_action_description == performed_action_description):
+                self.performed_action_description_count = self.performed_action_description_count + 1
+            else:
+                self.performed_action_description_count = 1
+            performed_action_description_count_text = f" ({self.performed_action_description_count})" if self.performed_action_description_count > 1 else ""
+            self.performed_action_description_label.setText(performed_action_description + performed_action_description_count_text)
+            self.last_performed_action_description = performed_action_description
         else:
+            self.performed_action_description_count = 0
             new_jitter_pause_time_seconds = new_jitter_pause_time_ms / 1000
-            self.jitter_pause_label.setText(f"Pause: {new_jitter_pause_time_seconds:.1} s")
+            self.performed_action_description_label.setText(f"pause: {new_jitter_pause_time_seconds:.1} s")
 
-    def update_capture_size_label(self, new_value: Any) -> None:
-        self.capture_size_label.setText(f"Video: {self.webcam_control.actual_capture_size.x}x{self.webcam_control.actual_capture_size.y}@{self.webcam_control.fps}")
+    def update_video_settings_label(self, new_value: Any) -> None:
+        if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):
+            self.video_settings_label.setText(f"Video: {self.webcam_control.actual_capture_size.x}x{self.webcam_control.actual_capture_size.y}@{self.webcam_control.fps}")
+        else:
+            self.video_settings_label.setText(f"Video: {self.config.capture_source_url.value}")
 
     def closeEvent(self, event: Any) -> None:
         self.log.info("shutting down app")

@@ -83,6 +83,7 @@ class Config:
         self.max_jitter_pause_time_ms = ReactiveProperty(800)
 
         self.ui_theme = ReactiveProperty("dark_amber.xml")
+        self.is_show_settings = ReactiveProperty(False)
 
     def enable_logging_on_value_change(self) -> None:
         for k, v in self.__dict__.items():
