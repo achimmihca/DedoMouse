@@ -12,7 +12,7 @@ def get_mediapipe_path():
 a = Analysis(['src\\main.py'],
              pathex=['.\\'],
              binaries=[],
-             datas=[('LICENSE', '.'), ('styles.qss', '.')],
+             datas=[('LICENSE', '.'), ('README.md', '.'), ('styles.qss', '.')],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
