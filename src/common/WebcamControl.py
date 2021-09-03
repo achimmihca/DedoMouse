@@ -1,21 +1,23 @@
+from __future__ import annotations
 from typing import Any, Callable, List, Union
 from cv2 import cv2
 import numpy as np
 import urllib.request
-from .Config import Config
+import common.AppContext as AppContext
 from .Config import VideoCaptureSource
-from .GestureRecognizer import GestureRecognizer, HandFingerPositions
+from .GestureRecognizer import HandFingerPositions
 from .LogHolder import LogHolder
 from .Vector import Vector
 from .draw_util import draw_circle, draw_line
 
 class WebcamControl(LogHolder):
-    def __init__(self, config: Config, gesture_regocnizer: GestureRecognizer):
+    def __init__(self, app_context: AppContext.AppContext):
         super().__init__()
-        self.config = config
+        self.app_context = app_context
+        self.config = app_context.config
         self.actual_capture_size = self.config.capture_size.value
         self.fps = self.config.capture_fps.value
-        self.gesture_recognizer = gesture_regocnizer
+        self.gesture_recognizer = app_context.gesture_regocnizer
         self.frame_analyzed_callbacks: List[Callable[[Any, Vector], None]] = []
         self.restart_video_capture = False
 

@@ -1,13 +1,14 @@
-from typing import Callable
+from __future__ import annotations
 import keyboard # type: ignore
-from .Config import Config
+import common.AppContext as AppContext
 from .LogHolder import LogHolder
 
 class GlobalShortcutControl(LogHolder):
-    def __init__(self, config: Config, on_close_callback: Callable):
+    def __init__(self, app_context: AppContext.AppContext):
         super().__init__()
-        self.config = config
-        self.on_close_callback = on_close_callback
+        self.app_context = app_context
+        self.config = app_context.config
+        self.on_close_callback = app_context.main_window.close
  
     def start_listener(self) -> None:
         try:

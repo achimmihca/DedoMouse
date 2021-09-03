@@ -3,11 +3,11 @@ from enum import Enum
 from typing import Any, List, Union
 from itertools import chain
 import mediapipe # type: ignore
+import common.AppContext as AppContext
 from .LogHolder import LogHolder
 from .util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except, limit_float
 from .draw_util import put_text
-from .MouseControl import MouseButton, MouseControl
-from .Config import Config
+from .MouseControl import MouseButton
 from .ReactiveProperty import ReactiveProperty
 from .Vector import Vector
 
@@ -19,10 +19,11 @@ class GestureRecognizer(LogHolder):
     ring_finger_indexes = [13, 14, 15, 16]
     pinky_finger_indexes = [17, 18, 19, 20]
 
-    def __init__(self, config: Config, mouse_control: MouseControl):
+    def __init__(self, app_context: AppContext.AppContext):
         super().__init__()
-        self.config = config
-        self.mouse_control = mouse_control
+        self.app_context = app_context
+        self.config = app_context.config
+        self.mouse_control = app_context.mouse_control
 
         self.mediapipe_hands = mediapipe.solutions.hands.Hands(max_num_hands=1)
 

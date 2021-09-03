@@ -4,16 +4,17 @@ import time
 import mouse # type: ignore
 from enum import Enum
 from rx.subject.subject import Subject
-from .Config import Config
+import common.AppContext as AppContext
 from .LogHolder import LogHolder
 from .PidControl import PidControl
 from .Vector import Vector
 from .util import get_time_ms
 
 class MouseControl(LogHolder):
-    def __init__(self, config: Config):
+    def __init__(self, app_context: AppContext.AppContext):
         super().__init__()
-        self.config = config
+        self.app_context = app_context
+        self.config = app_context.config
 
         # Configure PID values:
         # - start by setting i and d to zero and p to a small value.
