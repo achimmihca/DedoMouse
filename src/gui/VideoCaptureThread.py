@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import time
 from typing import Any
 import logging
 import cv2
@@ -21,15 +21,20 @@ class VideoCaptureThread(QThread):
 
     def run(self) -> None:
         self.log.info("started VideoCaptureThread")
-        self.webcam_control.frame_analyzed_callbacks.append(self.display_video_frame)
-        try:
-            video_capture_error_message = self.webcam_control.start_video_capture()
-            if video_capture_error_message is not None:
-                self.video_display_label.setText(video_capture_error_message)
-        except Exception:
-            error_message = ":(\n\nError during video capture or processing.\nCheck log file for further information."
-            self.log.exception(error_message)
-            self.video_display_label.setText(error_message)
+        while self.config.running.value:
+            self.webcam_control.frame_analyzed_callbacks.append(self.display_video_frame)
+            try:
+                video_capture_error_message = self.webcam_control.start_video_capture()
+                if video_capture_error_message is not None:
+                    self.video_display_label.setText(video_capture_error_message)
+            except Exception:
+                error_message = ":(\n\nError during video capture or processing.\nCheck log file for further information."
+                self.log.exception(error_message)
+                self.video_display_label.setText(error_message)
+
+            # Wait until video capture should be restarted
+            while self.config.running.value and not self.webcam_control.is_restart_video_capture:
+                time.sleep(0.1)
 
     def display_video_frame(self, frame: Any, frame_size: Vector) -> None:
         try:

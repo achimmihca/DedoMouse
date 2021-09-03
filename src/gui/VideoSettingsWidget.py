@@ -101,9 +101,6 @@ class VideoSettingsWidget(QWidget, LogHolder):
         self.config.capture_device_index.subscribe_and_run(lambda new_value: device_index_spinner.setValue(new_value))
         device_index_spinner.valueChanged.connect(lambda new_value: self.config.capture_device_index.set_value(new_value))
 
-        # Restart hint
-        internal_webcam_grid_layout.addWidget(RequireAppRestartLabel(), 3, 0)
-
         return internal_webcam_group
 
     def create_ip_webcam_widget(self) -> QWidget:
@@ -127,8 +124,5 @@ class VideoSettingsWidget(QWidget, LogHolder):
 
         self.config.capture_source_url.subscribe_and_run(lambda new_value: self.ip_webcam_url_text_edit.setText(new_value))
         self.ip_webcam_url_text_edit.editingFinished.connect(lambda: self.config.capture_source_url.set_value(self.ip_webcam_url_text_edit.text()))  # type: ignore
-
-        # Restart hint
-        ip_webcam_grid_layout.addWidget(RequireAppRestartLabel(), 3, 0)
 
         return ip_webcam_group

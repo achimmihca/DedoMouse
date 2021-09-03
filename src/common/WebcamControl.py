@@ -9,6 +9,7 @@ from .GestureRecognizer import HandFingerPositions
 from .LogHolder import LogHolder
 from .Vector import Vector
 from .draw_util import draw_circle, draw_line
+from rx import operators as ops
 
 class WebcamControl(LogHolder):
     def __init__(self, app_context: AppContext.AppContext):
@@ -19,7 +20,19 @@ class WebcamControl(LogHolder):
         self.fps = self.config.capture_fps.value
         self.gesture_recognizer = app_context.gesture_regocnizer
         self.frame_analyzed_callbacks: List[Callable[[Any, Vector], None]] = []
-        self.restart_video_capture = False
+        self.is_restart_video_capture = False
+
+        # Restart video capture when config has been changed and is stable.
+        short_delay_in_seconds = 1
+        long_delay_in_seconds = 3
+        self.config.capture_device_index.pipe(ops.debounce(short_delay_in_seconds)).subscribe(self.restart_video_capture)
+        self.config.capture_size.pipe(ops.debounce(long_delay_in_seconds)).subscribe(self.restart_video_capture)
+        self.config.capture_fps.pipe(ops.debounce(long_delay_in_seconds)).subscribe(self.restart_video_capture)
+        self.config.capture_source.pipe(ops.debounce(short_delay_in_seconds)).subscribe(self.restart_video_capture)
+        self.config.capture_source_url.pipe(ops.debounce(long_delay_in_seconds)).subscribe(self.restart_video_capture)
+
+    def restart_video_capture(self, argument: Any = None) -> None:
+        self.is_restart_video_capture = True
 
     def start_video_capture(self) -> Union[str, None]:
         if not self.config.running.value:
@@ -36,7 +49,7 @@ class WebcamControl(LogHolder):
 
         self.log.info("starting video capture analysis loop")
         # LOOP START
-        while self.config.running.value and (not self.restart_video_capture):
+        while self.config.running.value and (not self.is_restart_video_capture):
             if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM
                     or not self.config.capture_source_url.value.endswith(".jpg")):
                 ret, frame = self.cap.read()
@@ -62,9 +75,9 @@ class WebcamControl(LogHolder):
 
         self.log.info("video capture analysis loop finished")
 
-        if self.restart_video_capture:
+        if self.config.running.value and self.is_restart_video_capture:
             self.log.info("restarting video capture")
-            self.restart_video_capture = False
+            self.is_restart_video_capture = False
             return self.start_video_capture()
 
         return ""
@@ -72,11 +85,11 @@ class WebcamControl(LogHolder):
     def start_video_capture_stream(self) -> Union[str, None]:
         try:
             if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):
-                self.cap = cv2.VideoCapture(self.config.capture_device_index.value)
+                self.cap: Any = cv2.VideoCapture(self.config.capture_device_index.value)
             elif (self.config.capture_source_url.value):
                 # Check available video backends
-                availableBackends = [cv2.videoio_registry.getBackendName(b) for b in cv2.videoio_registry.getBackends()]
-                self.log.info(f"available video backends: {availableBackends}")
+                available_backends = [cv2.videoio_registry.getBackendName(b) for b in cv2.videoio_registry.getBackends()]
+                self.log.info(f"available video backends: {available_backends}")
 
                 self.cap = cv2.VideoCapture(self.config.capture_source_url.value)
                 self.log.info(f"Video stream of '{self.config.capture_source_url.value}' opened: {self.cap.isOpened()}")
