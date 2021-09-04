@@ -1,0 +1,17 @@
+.sponsor-button {
+    background-color: #dee2e6;
+    flex-grow: 1;
+    border: 1px solid darkgrey;
+}
+
+.sponsor-button:hover {
+    background-color: #dadbdc;
+}
+
+.sponsor-button:active {
+    border-color: #0a53be;
+}
+
+.download-button {
+    flex-grow: 1;
+}

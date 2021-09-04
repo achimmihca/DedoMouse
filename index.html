@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>DedoMouse</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Google fonts-->
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,600;1,600&amp;display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,300;0,500;0,600;0,700;1,300;1,500;1,600;1,700&amp;display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+        <link href="css/additional-styles.css" rel="stylesheet" />
+    </head>
+    <body id="page-top">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm" id="mainNav">
+            <div class="container px-5">
+                <a class="navbar-brand fw-bold" href="#page-top">DedoMouse</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    Menu
+                    <i class="bi-list"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ms-auto me-4 my-3 my-lg-0">
+                        <li class="nav-item"><a class="nav-link me-lg-3 active" href="#page-top">Home</a></li>
+                        <li class="nav-item"><a class="nav-link me-lg-3" href="#download">Download</a></li>
+                        <li class="nav-item"><a class="nav-link me-lg-3" href="https://github.com/achimmihca/DedoMouse">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Mashead header-->
+        <header class="masthead">
+            <div class="container px-5">
+                <div class="row gx-5 align-items-center">
+                    <div class="col-lg-6">
+                        <!-- Mashead text and app badges-->
+                        <div class="mb-5 mb-lg-0 text-center text-lg-start">
+                            <h1 class="display-1 lh-1 mb-3 font-alt">DedoMouse</h1>
+                            <p class="lead text-muted">Control your computer mouse with your hands and a webcam!</p>
+                            <p class="lead text-muted">The gesture based remote control of DedoMouse allows you to take a step back from your desk
+                            and reduce the time spent in uncomfortable positions.</p>
+                            <p class="lead text-muted">Built on the excellent hand and finger tracking of <a href="https://google.github.io/mediapipe/solutions/hands.html">Google&nbsp;MediaPipe</a>.</p>
+                            
+                            <!-- Buttons -->
+                            <div class="d-flex flex-column flex-lg-row align-items-center">
+                                <a class="btn btn-primary btn-lg blue-bg bg-gradient mb-2" href="https://github.com/achimmihca/DedoMouse/releases/latest" target="_blank" style="width: 300px; margin-left: 5px; margin-right: 5px;">Get DedoMouse</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div id="image-carousel" class="carousel carousel-dark slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                <!-- <button type="button" data-bs-target="#image-carousel" data-bs-slide-to="0" class="active"
+                                    aria-current="true" aria-label="Slide 1"></button> -->
+                                <!-- <button type="button" data-bs-target="#image-carousel" data-bs-slide-to="1"
+                                    aria-label="Slide 2"></button>
+                                <button type="button" data-bs-target="#image-carousel" data-bs-slide-to="2"
+                                    aria-label="Slide 3"></button>
+                                <button type="button" data-bs-target="#image-carousel" data-bs-slide-to="3"
+                                    aria-label="Slide 4"></button> -->
+                            </div>
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="assets/screenshots/screenshot1.png"
+                                        style="max-width: 100%; max-height: 100%; width: 600px; height: 100%;" />
+                                </div>
+                                <!-- <div class="carousel-item">
+                                    <img src="assets/screenshots/screenshot2.png"
+                                        style="max-width: 100%; max-height: 100%; width: 600px; height: 100%;" />
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="assets/screenshots/screenshot3.png"
+                                        style="max-width: 100%; max-height: 100%; width: 600px; height: 100%;" />
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="assets/screenshots/screenshot4.png"
+                                        style="max-width: 100%; max-height: 100%; width: 600px; height: 100%;" />
+                                </div> -->
+                            </div>
+                            <!-- <button class="carousel-control-prev" type="button" data-bs-target="#image-carousel"
+                                data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#image-carousel"
+                                data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button> -->
+                    
+                            <!-- <div class="carousel-indicators">
+                                <button type="button" data-bs-target="#image-carousel" data-bs-slide-to="0" class="active"
+                                    aria-current="true" aria-label="Slide 1">
+                                </button>
+                                <button type="button" data-bs-target="#image-carousel" data-bs-slide-to="1"
+                                    aria-label="Slide 2">
+                                </button>
+                                <button type="button" data-bs-target="#image-carousel" data-bs-slide-to="2"
+                                    aria-label="Slide 3">
+                                </button>
+                                <button type="button" data-bs-target="#image-carousel" data-bs-slide-to="3"
+                                    aria-label="Slide 4">
+                                </button> 
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Quote/testimonial aside-->
+        <section class="py-5 bg-gradient-primary-to-secondary">
+            <div class="content">
+                <div class="container px-5">
+                    <h2 class="text-white display-1 lh-1 mb-4 font-alt">Useful for:</h2>
+                    <ul class="text-white fs-4 font-alt">
+                        <li>Presentations: show next slide or image</li>
+                        <li>Simple browsing: for example, start a video</li>
+                        <li>Reduced bacteria transfer: no need to touch an input device at an ATM or laboratory</li>
+                        <li>Simple games: point and click adventures, visual novels, etc.</li>
+                        <li>People who cannot or do not want to use a regular mouse (e.g. because of RSI)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <!-- App features section-->
+        <section id="features">
+            <div class="container px-5">
+                <div class="row gx-5 align-items-center">
+                    <div class="container-fluid px-5">
+                        <div class="row gx-5">
+                            <div class="col-md-6 col-lg-4">
+                                <!-- Feature item-->
+                                <div class="text-center mb-3">
+                                    <i class="bi-phone icon-feature text-gradient d-block"></i>
+                                    <h3 class="font-alt">Smartphone as Webcam</h3>
+                                    <p class="text-muted mb-0">Tools like <a href="https://iriun.com">Iriun Webcam</a>
+                                        or <a href="https://www.e2esoft.com/ivcam">iVCam</a>
+                                        allow to use a smartphone as webcam.
+                                        <i>Tip: Connect your smartphone via USB for better performance.</i>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <!-- Feature item-->
+                                <div class="text-center mb-5">
+                                    <i class="bi-display icon-feature text-gradient d-block"></i>
+                                    <h3 class="font-alt">All Monitors</h3>
+                                    <p class="text-muted mb-0">Freely configure the size of your monitor or even multiple monitors.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <!-- Feature item-->
+                                <div class="text-center  mb-5">
+                                    <i class="bi-hand-thumbs-up icon-feature text-gradient d-block"></i>
+                                    <h3 class="font-alt">Intuitive Gestures</h3>
+                                    <p class="text-muted mb-0">Use <a href="https://github.com/achimmihca/DedoMouse/wiki/Home">simple gestures</a>, for example <i>thumb up</i> for scrolling.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <!-- Feature item-->
+                                <div class="text-center  mb-5">
+                                    <i class="bi-diamond-half icon-feature text-gradient d-block"></i>
+                                    <h3 class="font-alt">Light and Dark</h3>
+                                    <p class="text-muted mb-0">Choose a UI theme that suits your style.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <!-- Feature item-->
+                                <div class="text-center  mb-5">
+                                    <i class="bi-gear icon-feature text-gradient d-block"></i>
+                                    <h3 class="font-alt">Easy Setup</h3>
+                                    <p class="text-muted mb-0">Immediately see and test changes to the settings.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <!-- Feature item-->
+                                <div class="text-center  mb-5">
+                                    <i class="bi-code icon-feature text-gradient d-block"></i>
+                                    <h3 class="font-alt">Open Source</h3>
+                                    <p class="text-muted mb-0">DedoMouse belongs to everyone. Get involved, add features or ideas on <a href="https://github.com/achimmihca/DedoMouse">GitHub</a>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Basic features section-->
+        <!-- <section class="bg-light">
+            <div class="container px-5">
+                <div class="row gx-5 align-items-center justify-content-center justify-content-lg-between">
+                    <div class="col-12 col-lg-8">
+                        <h2 class="display-4 mb-4 font-alt">Title</h2>
+                        <p class="lead text-muted">Text</p>
+                    </div>
+                    <div class="col-4 d-none d-lg-block">
+                        <img src="assets/imgages/cool-image.png" style="max-width: 100%; max-height: 100%; width: 100%; height: 100%;"/>
+                    </div>
+                </div>
+            </div>
+        </section> -->
+        <!-- Call to action section-->
+        <!-- <section class="cta py-5">
+            <div class="cta-content">
+                <div class="container px-5">
+                    <div class="h2 fs-3 text-white font-alt">Title</div>
+                        <div class="h2 fs-3 text-white font-alt">Bla</div>
+                </div>
+            </div>
+        </section> -->
+        <!-- App badge section-->
+        <section class="bg-light" id="download" style="background-color: grey;">
+            <div class="container px-5">
+                <h2 class="text-center font-alt mb-4">Download</h2>
+
+                <div class="d-flex flex-column align-items-center flex-md-row justify-content-center">
+                    <a class="btn btn-primary btn-lg blue-bg bg-gradient mb-2" href="https://github.com/achimmihca/DedoMouse/releases/latest" target="_blank" style="width: 300px; margin-left: 5px; margin-right: 5px;">Get DedoMouse</a>
+                </div>
+                <div class="d-flex flex-column align-items-center flex-md-row justify-content-center">
+                    <p>Unzip the archive and start DedoMouse.exe &mdash; no further installation needed.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="bg-black text-center py-4"">
+            <div class="container-fluid px-5">
+                <div class="col-12 d-flex flex-row fs-4" style="justify-content: space-between;">
+                    <div class="fw-bold text-muted font-alt" aria-hidden="true">DedoMouse</div>
+                    <div class="container" style="text-align: right;">
+                        <a href="https://github.com/achimmihca/DedoMouse" class="mx-2">
+                            <i class="bi bi-github" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
+</html>
