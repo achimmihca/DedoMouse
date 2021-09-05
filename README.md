@@ -3,7 +3,7 @@ DedoMouse let's you control your computer mouse with your hands and a webcam.
 
 Therefor, it uses the hand and finger tracking of Google's [MediaPipe](https://google.github.io/mediapipe/solutions/hands).
 
-For available mouse actions and the corresponding hand gestures see [here](https://achimmihca.github.io/DedoMouse/)
+For available mouse actions and the corresponding hand gestures see [here](https://github.com/achimmihca/DedoMouse/wiki/).
 
 Feel free to suggest questions, ideas and issues on [GitHub](https://github.com/achimmihca/DedoMouse/issues).
 
