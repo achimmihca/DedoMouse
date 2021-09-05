@@ -23,6 +23,7 @@ class VideoCaptureThread(QThread):
         self.log.info("started VideoCaptureThread")
         while self.config.running.value:
             self.webcam_control.frame_analyzed_callbacks.append(self.display_video_frame)
+            self.webcam_control.restart_video_capture_callbacks.append(self.on_video_capture_restart)
             try:
                 video_capture_error_message = self.webcam_control.start_video_capture()
                 if video_capture_error_message is not None:
@@ -49,3 +50,6 @@ class VideoCaptureThread(QThread):
             self.video_display_label.setPixmap(QPixmap.fromImage(image))
         except Exception:
             self.log.exception(f"Could not display video.")
+
+    def on_video_capture_restart(self) -> None:
+        self.video_display_label.setText("Restarting camera\nwith changed settings...")

@@ -4,12 +4,14 @@ from cv2 import cv2
 import numpy as np
 import urllib.request
 import common.AppContext as AppContext
+from common.util import to_json
 from .Config import VideoCaptureSource
 from .GestureRecognizer import HandFingerPositions
 from .LogHolder import LogHolder
 from .Vector import Vector
 from .draw_util import draw_circle, draw_line
 from rx import operators as ops
+import rx
 
 class WebcamControl(LogHolder):
     def __init__(self, app_context: AppContext.AppContext):
@@ -20,19 +22,30 @@ class WebcamControl(LogHolder):
         self.fps = self.config.capture_fps.value
         self.gesture_recognizer = app_context.gesture_regocnizer
         self.frame_analyzed_callbacks: List[Callable[[Any, Vector], None]] = []
+        self.restart_video_capture_callbacks: List[Callable[[], None]] = []
         self.is_restart_video_capture = False
 
-        # Restart video capture when config has been changed and is stable.
-        short_delay_in_seconds = 1
-        long_delay_in_seconds = 3
-        self.config.capture_device_index.pipe(ops.debounce(short_delay_in_seconds)).subscribe(self.restart_video_capture)
-        self.config.capture_size.pipe(ops.debounce(long_delay_in_seconds)).subscribe(self.restart_video_capture)
-        self.config.capture_fps.pipe(ops.debounce(long_delay_in_seconds)).subscribe(self.restart_video_capture)
-        self.config.capture_source.pipe(ops.debounce(short_delay_in_seconds)).subscribe(self.restart_video_capture)
-        self.config.capture_source_url.pipe(ops.debounce(long_delay_in_seconds)).subscribe(self.restart_video_capture)
+        # Restart video capture when any video-capture-config has been changed and is stable.
+        delay_in_seconds = 3
+        self.last_config_json = to_json(self.config, False)
+        (rx.of(self.config.capture_device_index.subject,
+                  self.config.capture_size.subject,
+                  self.config.capture_fps.subject,
+                  self.config.capture_source.subject,
+                  self.config.capture_source_url.subject)
+            .pipe(ops.merge_all())
+            .pipe(ops.debounce(delay_in_seconds))
+            .subscribe(self.restart_video_capture))
 
     def restart_video_capture(self, argument: Any = None) -> None:
-        self.is_restart_video_capture = True
+        current_config_json = to_json(self.config, False)
+        if (not self.is_restart_video_capture
+                and self.last_config_json != current_config_json):
+            self.last_config_json = current_config_json
+            self.log.info("init restart of video capture")
+            self.is_restart_video_capture = True
+            for callback in self.restart_video_capture_callbacks:
+                callback()
 
     def start_video_capture(self) -> Union[str, None]:
         if not self.config.running.value:
@@ -49,6 +62,7 @@ class WebcamControl(LogHolder):
 
         self.log.info("starting video capture analysis loop")
         # LOOP START
+        self.is_restart_video_capture = False
         while self.config.running.value and (not self.is_restart_video_capture):
             if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM
                     or not self.config.capture_source_url.value.endswith(".jpg")):
@@ -77,7 +91,6 @@ class WebcamControl(LogHolder):
 
         if self.config.running.value and self.is_restart_video_capture:
             self.log.info("restarting video capture")
-            self.is_restart_video_capture = False
             return self.start_video_capture()
 
         return ""
