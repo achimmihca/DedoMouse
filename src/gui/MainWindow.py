@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+from __future__ import annotations
 from typing import Any
 from PySide6.QtGui import QResizeEvent
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QLabel
 from common.version import version
+import common.AppContext as AppContext
 from common.Config import Config
 from common.Config import VideoCaptureSource
 from common.LogHolder import LogHolder
@@ -16,12 +18,12 @@ from .VideoCaptureThread import VideoCaptureThread
 from rx import operators as ops
 
 class MainWindow(QMainWindow, LogHolder):
-    def __init__(self, config: Config, webcam_control: WebcamControl) -> None:
+    def __init__(self, app_context: AppContext.AppContext) -> None:
         QMainWindow.__init__(self)
         LogHolder.__init__(self)
         self.setWindowTitle(f"DedoMouse")
-        self.config = config
-        self.webcam_control = webcam_control
+        self.app_context = app_context
+        self.config = app_context.config
 
         self.setup_style_sheet()
         self.setup_ui()
@@ -40,7 +42,7 @@ class MainWindow(QMainWindow, LogHolder):
         self.resize_event_reactive_property.pipe(ops.debounce(0.1)).subscribe(update_config_window_size)
 
     def setup_video_capture(self) -> None:
-        self.video_capture_thread = VideoCaptureThread(self.config, self.webcam_control, self.main_widget.image_label)
+        self.video_capture_thread = VideoCaptureThread(self.config, self.app_context.webcam_control, self.main_widget.image_label)
         self.video_capture_thread.start()
 
     def resizeEvent(self, event: QResizeEvent) -> None:
@@ -85,8 +87,8 @@ class MainWindow(QMainWindow, LogHolder):
         self.performed_action_description_count = 0
         self.performed_action_description_label = QLabel()
         self.statusBar().addWidget(self.performed_action_description_label)
-        self.webcam_control.gesture_recognizer.jitter_pause_time_ms.subscribe(lambda new_value: self.update_performed_action_description_label(float(new_value), ""))
-        self.webcam_control.gesture_recognizer.mouse_control.performed_action_desciption.subscribe(lambda new_value: self.update_performed_action_description_label(0, new_value))
+        self.app_context.gesture_recognizer.jitter_pause_time_ms.subscribe(lambda new_value: self.update_performed_action_description_label(float(new_value), ""))
+        self.app_context.mouse_control.performed_action_desciption.subscribe(lambda new_value: self.update_performed_action_description_label(0, new_value))
 
     def update_performed_action_description_label(self, new_jitter_pause_time_ms: float, performed_action_description: str) -> None:
         if (new_jitter_pause_time_ms <= 0):
@@ -104,7 +106,7 @@ class MainWindow(QMainWindow, LogHolder):
 
     def update_video_settings_label(self, new_value: Any) -> None:
         if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):
-            self.video_settings_label.setText(f"Video: {self.webcam_control.actual_capture_size.x}x{self.webcam_control.actual_capture_size.y}@{self.webcam_control.fps}")
+            self.video_settings_label.setText(f"Video: {self.app_context.webcam_control.actual_capture_size.x}x{self.app_context.webcam_control.actual_capture_size.y}@{self.app_context.webcam_control.fps}")
         else:
             self.video_settings_label.setText(f"Video: {self.config.capture_source_url.value}")
 

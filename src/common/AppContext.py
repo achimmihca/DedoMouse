@@ -30,7 +30,7 @@ class AppContext:
         apply_stylesheet(self.qt_application, theme=self.config.ui_theme.value)
         self.config.ui_theme.subscribe(lambda new_theme: apply_stylesheet(self.qt_application, theme=new_theme))
 
-        self.main_window = MainWindow(self.config, self.webcam_control)
+        self.main_window = MainWindow(self)
 
         # Register global shortcut control
         shortcut_control = GlobalShortcutControl(self)
