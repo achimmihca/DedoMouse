@@ -1,15 +1,18 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Any, List, Union
-from itertools import chain
 import mediapipe # type: ignore
 import common.AppContext as AppContext
 from .LogHolder import LogHolder
+from .Config import MousePositioningMode
+from .Config import DisableMousePositioningTrigger
 from .util import all_decreasing, all_increasing, get_min_element, get_max_element, get_time_ms, get_elements_except, limit_float
 from .draw_util import put_text
 from .MouseControl import MouseButton
 from .ReactiveProperty import ReactiveProperty
 from .Vector import Vector
+from .HandFingerPositions import HandFingerPositions
+from .FingerPosition import FingerPosition
 
 class GestureRecognizer(LogHolder):
     wrist_index = 0
@@ -26,8 +29,6 @@ class GestureRecognizer(LogHolder):
         self.mouse_control = app_context.mouse_control
 
         self.mediapipe_hands = mediapipe.solutions.hands.Hands(max_num_hands=1)
-
-        self.actual_capture_size = self.config.capture_size.value
 
         self.last_left_click_time_ms = 0
         self.last_right_click_time_ms = 0
@@ -64,6 +65,8 @@ class GestureRecognizer(LogHolder):
                 hand_finger_positions = self.process_hand_landmarks(frame, mediapipe_results.multi_hand_landmarks)
         else:
             self.jitter_pause_time_ms.value = limit_float(self.jitter_pause_time_ms.value + (delta_time_ms * 3), 0, self.config.max_jitter_pause_time_ms.value)
+            if self.jitter_pause_time_ms.value > 0.4:
+                self.mouse_control.last_mouse_position = None
 
         self.last_frame_analysis_time_ms = get_time_ms()
         return hand_finger_positions
@@ -71,13 +74,10 @@ class GestureRecognizer(LogHolder):
     def process_hand_landmarks(self, frame: Any, multi_hand_landmarks: Any) -> HandFingerPositions:
         # find landmark positions
         first_hand_landmarks = multi_hand_landmarks[0]
-        hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.actual_capture_size)
+        hand_finger_positions = HandFingerPositions(first_hand_landmarks, self.app_context.webcam_control.actual_capture_size)
 
         # detect mouse position
-        if (self.config.motion_border_left.value + self.config.motion_border_right.value < 1
-                and self.config.motion_border_bottom.value + self.config.motion_border_top.value < 1):
-            mouse_pos_px = self.get_mouse_position_px(hand_finger_positions.wrist_position.percent, frame)
-            self.mouse_control.on_new_mouse_position_detected(mouse_pos_px)
+        self.detect_mouse_position(frame, hand_finger_positions)
 
         # detect click
         current_time_ms = get_time_ms()
@@ -93,6 +93,28 @@ class GestureRecognizer(LogHolder):
 
         return hand_finger_positions
 
+    def detect_mouse_position(self, frame: Any, hand_finger_positions: HandFingerPositions) -> None:
+        all_fingers_near_thumb = self.is_near_target([hand_finger_positions.index_tip_position,
+                                                      hand_finger_positions.middle_tip_position,
+                                                      hand_finger_positions.ring_tip_position,
+                                                      hand_finger_positions.pinky_tip_position],
+                                                     hand_finger_positions.thumb_tip_position)
+        all_fingers_faraway_thumb = self.is_faraway_target([hand_finger_positions.index_tip_position,
+                                                            hand_finger_positions.middle_tip_position,
+                                                            hand_finger_positions.ring_tip_position,
+                                                            hand_finger_positions.pinky_tip_position],
+                                                           hand_finger_positions.thumb_tip_position)
+        if ((all_fingers_near_thumb and self.config.disable_mouse_positioning_trigger.value == DisableMousePositioningTrigger.ALL_FINGERS_NEAR_THUMB)
+                or (not all_fingers_near_thumb and self.config.disable_mouse_positioning_trigger.value == DisableMousePositioningTrigger.ANY_FINGER_FARAWAY_THUMB)
+                or (all_fingers_faraway_thumb and self.config.disable_mouse_positioning_trigger.value == DisableMousePositioningTrigger.ALL_FINGERS_FARAWAY_THUMB)):
+            self.mouse_control.last_mouse_position = None
+            return
+
+        if (self.config.motion_border_left.value + self.config.motion_border_right.value < 1
+                and self.config.motion_border_bottom.value + self.config.motion_border_top.value < 1):
+            mouse_pos_px = self.get_mouse_position_px(hand_finger_positions.wrist_position.percent, frame)
+            self.mouse_control.on_new_mouse_position_detected(mouse_pos_px)
+
     def get_mouse_position_px(self, screen_pos_percent: Vector, frame: Any) -> Vector:
         pos_percent_x = (screen_pos_percent.x - self.config.motion_border_left.value) / (1 - self.config.motion_border_left.value - self.config.motion_border_right.value)
         pos_percent_x = max(0, min(1, pos_percent_x))
@@ -102,8 +124,9 @@ class GestureRecognizer(LogHolder):
         mouse_y = int(self.config.screen_offset.value.y + self.config.screen_size.value.y * pos_percent_y)
 
         screen_pos_px = screen_pos_percent.scale(self.config.capture_size.value).add(Vector(10, 10))
-        pos_text = f"{pos_percent_x * 100:.0f}% ({mouse_x}px) | {pos_percent_y * 100:.0f}% ({mouse_y}px)"
-        put_text(frame, pos_text, screen_pos_px, 1.5, (255, 255, 255), 2)
+        if self.config.mouse_positioning_mode.value == MousePositioningMode.ABSOLUTE:
+            pos_text = f"{pos_percent_x * 100:.0f}% ({mouse_x}px) | {pos_percent_y * 100:.0f}% ({mouse_y}px)"
+            put_text(frame, pos_text, screen_pos_px, 1.5, (255, 255, 255), 2)
         
         return Vector(mouse_x, mouse_y, 0)
 
@@ -345,6 +368,30 @@ class GestureRecognizer(LogHolder):
                 return False
         return True
 
+    def get_motion_border_top(self) -> float:
+        if self.config.mouse_positioning_mode.value == MousePositioningMode.ABSOLUTE:
+            return self.config.motion_border_top.value
+        else:
+            return 0
+
+    def get_motion_border_left(self) -> float:
+        if self.config.mouse_positioning_mode.value == MousePositioningMode.ABSOLUTE:
+            return self.config.motion_border_left.value
+        else:
+            return 0
+
+    def get_motion_border_right(self) -> float:
+        if self.config.mouse_positioning_mode.value == MousePositioningMode.ABSOLUTE:
+            return self.config.motion_border_right.value
+        else:
+            return 0
+
+    def get_motion_border_bottom(self) -> float:
+        if self.config.mouse_positioning_mode.value == MousePositioningMode.ABSOLUTE:
+            return self.config.motion_border_bottom.value
+        else:
+            return 0
+
     def on_left_click(self, current_time_ms: int) -> None:
         self.allow_left_click = False
         self.left_click_count = self.left_click_count + 1
@@ -381,73 +428,6 @@ class GestureRecognizer(LogHolder):
     def on_scroll(self, x: int, y: int, current_time_ms: int) -> None:
         self.last_scroll_time_ms = current_time_ms
         self.mouse_control.on_scroll(x, y)
-
-class HandFingerPositions:
-    def __init__(self, single_hand_landmarks: Any, capture_size: Vector) -> None:
-        self.single_hand_landmarks = single_hand_landmarks
-
-        self.wrist_position = FingerPosition(single_hand_landmarks.landmark[GestureRecognizer.wrist_index], capture_size)
-        self.thumb_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.thumb_finger_indexes, capture_size)
-        self.index_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.index_finger_indexes, capture_size)
-        self.middle_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.middle_finger_indexes, capture_size)
-        self.ring_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.ring_finger_indexes, capture_size)
-        self.pinky_finger_positions = self.get_finger_positions_from_hand_landmarks(GestureRecognizer.pinky_finger_indexes, capture_size)
-
-        self.thumb_tip_position = self.thumb_finger_positions[-1]
-        self.index_tip_position = self.index_finger_positions[-1]
-        self.middle_tip_position = self.middle_finger_positions[-1]
-        self.ring_tip_position = self.ring_finger_positions[-1]
-        self.pinky_tip_position = self.pinky_finger_positions[-1]
-
-        self.all_finger_positions = list(chain.from_iterable([self.thumb_finger_positions,
-            self.index_finger_positions,
-            self.middle_finger_positions,
-            self.ring_finger_positions,
-            self.pinky_finger_positions]))
-
-        self.index_to_finger_position = {
-            0: self.wrist_position,
-            1: self.thumb_finger_positions[0],
-            2: self.thumb_finger_positions[1],
-            3: self.thumb_finger_positions[2],
-            4: self.thumb_finger_positions[3],
-
-            5: self.index_finger_positions[0],
-            6: self.index_finger_positions[1],
-            7: self.index_finger_positions[2],
-            8: self.index_finger_positions[3],
-            
-            9: self.middle_finger_positions[0],
-            10: self.middle_finger_positions[1],
-            11: self.middle_finger_positions[2],
-            12: self.middle_finger_positions[3],
-            
-            13: self.ring_finger_positions[0],
-            14: self.ring_finger_positions[1],
-            15: self.ring_finger_positions[2],
-            16: self.ring_finger_positions[3],
-            
-            17: self.pinky_finger_positions[0],
-            18: self.pinky_finger_positions[1],
-            19: self.pinky_finger_positions[2],
-            20: self.pinky_finger_positions[3],
-        }
-
-    def get_finger_positions_from_hand_landmarks(self,
-            finger_indexes: List[int],
-            capture_size: Vector) -> List[FingerPosition]:
-        return [FingerPosition(self.single_hand_landmarks.landmark[i], capture_size) for i in finger_indexes]
-
-    def get_finger_position_by_index(self, index: int) -> FingerPosition:
-        return self.index_to_finger_position[index]
-
-    def get_finger_positions_by_index(self, indexes: List[int]) -> List[FingerPosition]:
-        return [self.get_finger_position_by_index(index) for index in indexes]
-
-class FingerPosition:
-    def __init__(self, landmark: Any, capture_size: Vector) -> None:
-        self.percent = Vector.from_xyz(landmark)
-        self.px = self.percent.scale(capture_size).to_int_vector()
 
 class ThumbGestureDirection(Enum):
     UP = 1

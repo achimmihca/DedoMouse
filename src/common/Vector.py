@@ -158,6 +158,10 @@ class Vector:
             + self.y * self.y
             + self.z * self.z )
 
+    def normalize(self) -> Vector:
+        """ Returns a new Vector with the same direction and length (magnitude) 1."""
+        return self.scale_by_scalar(1 / self.magnitude())
+
     def dot(self, vec: Vector, theta_in_degrees: float = None) -> float:
         """ Returns a new Vector that is the dot product of two vectors.
         If theta is given then the dot product is computed as

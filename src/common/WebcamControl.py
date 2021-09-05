@@ -6,6 +6,7 @@ import urllib.request
 import common.AppContext as AppContext
 from common.util import to_json
 from .Config import VideoCaptureSource
+from .Config import MousePositioningMode
 from .GestureRecognizer import HandFingerPositions
 from .LogHolder import LogHolder
 from .Vector import Vector
@@ -20,7 +21,7 @@ class WebcamControl(LogHolder):
         self.config = app_context.config
         self.actual_capture_size = self.config.capture_size.value
         self.fps = self.config.capture_fps.value
-        self.gesture_recognizer = app_context.gesture_regocnizer
+        self.gesture_recognizer = app_context.gesture_recognizer
         self.frame_analyzed_callbacks: List[Callable[[Any, Vector], None]] = []
         self.restart_video_capture_callbacks: List[Callable[[], None]] = []
         self.is_restart_video_capture = False
@@ -153,8 +154,6 @@ class WebcamControl(LogHolder):
 
         self.log.info(f"Capturing video (width: {width}, height: {height}, fps: {self.fps})")
 
-        self.gesture_recognizer.actual_capture_size = self.actual_capture_size
-
         return None
 
     def process_frame(self, frame: Any) -> None:
@@ -166,8 +165,9 @@ class WebcamControl(LogHolder):
         if self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Draw some certain configurable values
-        self.draw_motion_border_overlay(frame)
+        # Draw certain configurable values
+        if self.config.mouse_positioning_mode.value == MousePositioningMode.ABSOLUTE:
+            self.draw_motion_border_overlay(frame)
 
         # Analyze image
         hand_finger_positions = self.gesture_recognizer.process_frame(frame)
@@ -178,7 +178,6 @@ class WebcamControl(LogHolder):
             callback(frame, self.actual_capture_size)
 
     def draw_motion_border_overlay(self, frame: Any) -> None:
-        # draw motion border
         color = (127, 127, 127)
         thickness = 2
         motion_border_left_x = self.config.motion_border_left.value * self.actual_capture_size.x
@@ -191,6 +190,7 @@ class WebcamControl(LogHolder):
         draw_line(frame, Vector(motion_border_right_x, motion_border_top_y), Vector(motion_border_right_x, motion_border_bottom_y), color, thickness)
         draw_line(frame, Vector(motion_border_left_x, motion_border_top_y), Vector(motion_border_right_x, motion_border_top_y), color, thickness)
         draw_line(frame, Vector(motion_border_left_x, motion_border_bottom_y), Vector(motion_border_right_x, motion_border_bottom_y), color, thickness)
+
         # vertical to edges
         draw_line(frame, Vector(0, 0), Vector(motion_border_left_x, motion_border_top_y), color, thickness)
         draw_line(frame, Vector(self.actual_capture_size.x, 0), Vector(motion_border_right_x, motion_border_top_y), color, thickness)

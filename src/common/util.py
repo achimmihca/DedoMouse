@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, TypeVar, Type
+from typing import Any, Callable, List, TypeVar, Type, Optional
 import time
 import jsonpickle # type: ignore
 
@@ -13,17 +13,17 @@ def get_time_ms() -> int:
 
 #############################################
 # Number Utils
-def limit_int(current_value: int, min_value: int, max_value: int) -> int:
-    if (current_value < min_value):
+def limit_int(current_value: int, min_value: Optional[int], max_value: Optional[int]) -> int:
+    if (min_value is not None and current_value < min_value):
         return min_value
-    if (current_value > max_value):
+    if (max_value is not None and current_value > max_value):
         return max_value
     return current_value
 
-def limit_float(current_value: float, min_value: float, max_value: float) -> float:
-    if (current_value < min_value):
+def limit_float(current_value: float, min_value: Optional[float], max_value: Optional[float]) -> float:
+    if (min_value is not None and current_value < min_value):
         return min_value
-    if (current_value > max_value):
+    if (max_value is not None and current_value > max_value):
         return max_value
     return current_value
 

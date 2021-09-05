@@ -1,6 +1,8 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QSlider, QFormLayout, QGroupBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QSlider, QFormLayout, QGroupBox, QRadioButton
 from common.Config import Config
+from common.Config import MousePositioningMode
+from common.Config import DisableMousePositioningTrigger
 from common.ReactiveProperty import ReactiveProperty
 from common.LogHolder import LogHolder
 from .qt_util import new_label
@@ -13,6 +15,9 @@ class GeometrySettingsWidget(QWidget, LogHolder):
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
 
+        main_layout.addWidget(self.create_mouse_positioning_control())
+        main_layout.addWidget(self.create_disable_mouse_positioning_trigger_control())
+        main_layout.addWidget(self.create_mouse_position_difference_control())
         main_layout.addWidget(self.create_motion_border_control())
         main_layout.addWidget(self.create_distance_threshold_control())
 
@@ -55,7 +60,7 @@ class GeometrySettingsWidget(QWidget, LogHolder):
         top_slider.valueChanged.connect(on_top_slider_changed)
         bottom_slider.valueChanged.connect(on_bottom_slider_changed)
 
-        group = QGroupBox("Positioning Border")
+        group = QGroupBox("Absolute Positioning Border")
         group_layout = QVBoxLayout()
         group.setLayout(group_layout)
 
@@ -66,6 +71,70 @@ class GeometrySettingsWidget(QWidget, LogHolder):
         form_layout.addRow(new_label("Right", "Right border"), right_slider)
         form_layout.addRow(new_label("Top", "Top border"), top_slider)
         form_layout.addRow(new_label("Bottom", "Bottom border"), bottom_slider)
+        return group
+
+    def create_mouse_positioning_control(self) -> QWidget:
+        group = QGroupBox("Positioning Mode")
+        group_layout = QVBoxLayout()
+        group.setLayout(group_layout)
+
+        relative_positioning_radio = QRadioButton("Relative")
+        absolute_positioning_radio = QRadioButton("Absolute")
+
+        def update_positioning_radio_by_config_value(new_value: MousePositioningMode) -> None:
+            if new_value == MousePositioningMode.RELATIVE:
+                relative_positioning_radio.setChecked(True)
+            elif new_value == MousePositioningMode.ABSOLUTE:
+                absolute_positioning_radio.setChecked(True)
+
+        self.config.mouse_positioning_mode.subscribe_and_run(update_positioning_radio_by_config_value)
+        relative_positioning_radio.clicked.connect(lambda new_value: self.config.mouse_positioning_mode.set_value(MousePositioningMode.RELATIVE))
+        absolute_positioning_radio.clicked.connect(lambda new_value: self.config.mouse_positioning_mode.set_value(MousePositioningMode.ABSOLUTE))
+
+        group_layout.addWidget(relative_positioning_radio)
+        group_layout.addWidget(absolute_positioning_radio)
+
+        return group
+
+    def create_disable_mouse_positioning_trigger_control(self) -> QWidget:
+        group = QGroupBox("Disable Positioning When")
+        group_layout = QVBoxLayout()
+        group.setLayout(group_layout)
+
+        all_near_thumb_radio = QRadioButton("All fingers near thumb")
+        all_faraway_thumb_radio = QRadioButton("All fingers faraway from thumb")
+        any_faraway_thumb_radio = QRadioButton("Any finger faraway from thumb")
+
+        def update_trigger_radio_by_config_value(new_value: DisableMousePositioningTrigger) -> None:
+            if new_value == DisableMousePositioningTrigger.ALL_FINGERS_NEAR_THUMB:
+                all_near_thumb_radio.setChecked(True)
+            elif new_value == DisableMousePositioningTrigger.ALL_FINGERS_FARAWAY_THUMB:
+                all_faraway_thumb_radio.setChecked(True)
+            elif new_value == DisableMousePositioningTrigger.ANY_FINGER_FARAWAY_THUMB:
+                any_faraway_thumb_radio.setChecked(True)
+
+        self.config.disable_mouse_positioning_trigger.subscribe_and_run(update_trigger_radio_by_config_value)
+        all_near_thumb_radio.clicked.connect(lambda new_value: self.config.disable_mouse_positioning_trigger.set_value(DisableMousePositioningTrigger.ALL_FINGERS_NEAR_THUMB))
+        all_faraway_thumb_radio.clicked.connect(lambda new_value: self.config.disable_mouse_positioning_trigger.set_value(DisableMousePositioningTrigger.ALL_FINGERS_FARAWAY_THUMB))
+        any_faraway_thumb_radio.clicked.connect(lambda new_value: self.config.disable_mouse_positioning_trigger.set_value(DisableMousePositioningTrigger.ANY_FINGER_FARAWAY_THUMB))
+
+        group_layout.addWidget(all_near_thumb_radio)
+        group_layout.addWidget(all_faraway_thumb_radio)
+        group_layout.addWidget(any_faraway_thumb_radio)
+
+        return group
+
+    def create_mouse_position_difference_control(self) -> QWidget:
+        difference_sensitivity = self.new_percent_slider(self.config.mouse_position_difference_sensitivity, 10, 200)
+
+        group = QGroupBox("Relative Positioning Sensitivity")
+        group_layout = QVBoxLayout()
+        group.setLayout(group_layout)
+
+        form_layout = QFormLayout()
+        group_layout.addLayout(form_layout)
+
+        form_layout.addRow(new_label("Sensitivity", "Position difference sensitivity"), difference_sensitivity)
         return group
 
     def create_distance_threshold_control(self) -> QWidget:

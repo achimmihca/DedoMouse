@@ -1,14 +1,18 @@
 from __future__ import annotations
+from typing import Optional
 import threading
 import time
 import mouse # type: ignore
+from math import sqrt
 from enum import Enum
 from rx.subject.subject import Subject
 import common.AppContext as AppContext
+from common.Config import MousePositioningMode
 from .LogHolder import LogHolder
 from .PidControl import PidControl
 from .Vector import Vector
 from .util import get_time_ms
+from .util import limit_float
 
 class MouseControl(LogHolder):
     def __init__(self, app_context: AppContext.AppContext):
@@ -33,6 +37,7 @@ class MouseControl(LogHolder):
         # Set to 0 if mouse is not moving smoothly. Then slowly increase value until ok.
         d = self.config.mouse_position_pid_d.value
 
+        self.last_mouse_position: Optional[Vector] = None
         self.mouse_x_pid_control = PidControl(p, i, d)
         self.mouse_y_pid_control = PidControl(p, i, d)
         self.last_mouse_position_time_ms = get_time_ms()
@@ -45,12 +50,46 @@ class MouseControl(LogHolder):
         self.performed_action_desciption.subscribe(lambda new_value: self.log.info(new_value))
 
     def on_new_mouse_position_detected(self, new_mouse_px: Vector) -> None:
+        if self.config.mouse_positioning_mode.value == MousePositioningMode.RELATIVE:
+            self._handle_new_mouse_position_via_relative_positioning(new_mouse_px)
+        elif self.config.mouse_positioning_mode.value == MousePositioningMode.ABSOLUTE:
+            self._handle_new_mouse_position_via_absolute_positioning(new_mouse_px)
+
+    def _handle_new_mouse_position_via_absolute_positioning(self, new_mouse_px: Vector):
         if self.config.is_control_mouse_position.value and not self.config.is_all_control_disabled.value:
             delta_time_seconds = (get_time_ms() - self.last_mouse_position_time_ms) / 1000
             current_pos = Vector.from_tuple2(mouse.get_position())
             smooth_mouse_x = self.mouse_x_pid_control.get_next_value(current_pos.x, new_mouse_px.x, delta_time_seconds)
             smooth_mouse_y = self.mouse_y_pid_control.get_next_value(current_pos.y, new_mouse_px.y, delta_time_seconds)
             mouse.move(smooth_mouse_x, smooth_mouse_y)
+            self.last_mouse_position_time_ms = get_time_ms()
+
+    def _handle_new_mouse_position_via_relative_positioning(self, new_mouse_px: Vector):
+        min_distance_px: float = self.app_context.webcam_control.actual_capture_size.x * self.config.min_mouse_position_difference_percent.value
+        if self.config.is_control_mouse_position.value and not self.config.is_all_control_disabled.value:
+            if not self.last_mouse_position:
+                self.last_mouse_position = new_mouse_px
+                return
+
+            mouse_position_difference = new_mouse_px.subtract(self.last_mouse_position)
+            if mouse_position_difference.magnitude() <= min_distance_px:
+                return
+            delta_time_seconds = (get_time_ms() - self.last_mouse_position_time_ms) / 1000
+
+            reduced_mouse_position_difference = mouse_position_difference.scale_by_scalar(1 - self.config.min_mouse_position_difference_percent.value)
+            # limit square root to avoid div by zero
+            reduced_mouse_position_difference_magniture_square_root = limit_float(sqrt(reduced_mouse_position_difference.magnitude()), 0.000001, None)
+            smooth_mouse_difference = (reduced_mouse_position_difference
+                                       .scale_by_scalar(1 / reduced_mouse_position_difference_magniture_square_root)
+                                       .scale_by_scalar(1 / delta_time_seconds)
+                                       .scale_by_scalar(self.config.mouse_position_difference_sensitivity.value))
+
+            current_pos = Vector.from_tuple2(mouse.get_position())
+            new_pos = current_pos.add(smooth_mouse_difference)
+            # smooth_mouse_x = self.mouse_x_pid_control.get_next_value(current_pos.x, new_pos.x, delta_time_seconds)
+            # smooth_mouse_y = self.mouse_y_pid_control.get_next_value(current_pos.y, new_pos.y, delta_time_seconds)
+            mouse.move(int(new_pos.x), int(new_pos.y))
+            self.last_mouse_position = new_mouse_px
             self.last_mouse_position_time_ms = get_time_ms()
 
     def on_single_click_detected(self, mouse_button: MouseButton) -> None:

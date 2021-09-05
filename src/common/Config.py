@@ -45,6 +45,12 @@ class Config:
         self.motion_border_top = ReactiveProperty(0.3)
         self.motion_border_bottom = ReactiveProperty(0.15)
 
+        # Mouse positioning
+        self.mouse_positioning_mode = ReactiveProperty(MousePositioningMode.RELATIVE)
+        self.disable_mouse_positioning_trigger = ReactiveProperty(DisableMousePositioningTrigger.ALL_FINGERS_NEAR_THUMB)
+        self.mouse_position_difference_sensitivity = ReactiveProperty(0.5)
+        self.min_mouse_position_difference_percent = ReactiveProperty(0.02)
+
         # Mouse position PID values
         self.mouse_position_pid_p = ReactiveProperty(0.4)
         self.mouse_position_pid_i = ReactiveProperty(0)
@@ -121,3 +127,12 @@ class ConfigException(Exception):
 class VideoCaptureSource(Enum):
     INTEGRATED_WEBCAM = 0
     IP_WEBCAM = 1
+
+class MousePositioningMode(Enum):
+    RELATIVE = 0
+    ABSOLUTE = 1
+
+class DisableMousePositioningTrigger(Enum):
+    ALL_FINGERS_NEAR_THUMB = 0
+    ALL_FINGERS_FARAWAY_THUMB = 1
+    ANY_FINGER_FARAWAY_THUMB = 2

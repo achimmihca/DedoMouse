@@ -22,7 +22,7 @@ class AppContext:
 
         # Create relevant class instances
         self.mouse_control = MouseControl(self)
-        self.gesture_regocnizer = GestureRecognizer(self)
+        self.gesture_recognizer = GestureRecognizer(self)
         self.webcam_control = WebcamControl(self)
 
         # Create Qt Application
