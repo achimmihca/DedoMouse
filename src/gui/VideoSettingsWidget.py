@@ -1,10 +1,9 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QFormLayout, QGroupBox, QSpinBox, QLabel, QLineEdit, QCheckBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QFormLayout, QGroupBox, QSpinBox, QLineEdit, QCheckBox
 from common.Config import Config
 from common.Config import VideoCaptureSource
 from common.LogHolder import LogHolder
 from common.Vector import Vector
 from .MonitorSettingsWidget import MonitorDimensionSpinBox
-from .RequireAppRestartLabel import RequireAppRestartLabel
 from .qt_util import new_label
 
 class VideoSettingsWidget(QWidget, LogHolder):
@@ -28,10 +27,14 @@ class VideoSettingsWidget(QWidget, LogHolder):
     def update_config_by_internal_webcam_button(self) -> None:
         if self.internal_webcam_widget.isChecked():
             self.config.capture_source.value = VideoCaptureSource.INTEGRATED_WEBCAM
+        else:
+            self.config.capture_source.value = VideoCaptureSource.IP_WEBCAM
 
     def update_config_by_ip_webcam_button(self) -> None:
         if self.ip_webcam_widget.isChecked():
             self.config.capture_source.value = VideoCaptureSource.IP_WEBCAM
+        else:
+            self.config.capture_source.value = VideoCaptureSource.INTEGRATED_WEBCAM
 
     def update_radio_buttons_by_capture_source(self, new_value: VideoCaptureSource) -> None:
         if (new_value == VideoCaptureSource.INTEGRATED_WEBCAM):
