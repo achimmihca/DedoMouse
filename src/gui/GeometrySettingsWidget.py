@@ -16,10 +16,15 @@ class GeometrySettingsWidget(QWidget, LogHolder):
         self.setLayout(main_layout)
 
         main_layout.addWidget(self.create_mouse_positioning_control())
+        mouse_position_difference_control = self.create_mouse_position_difference_control()
+        main_layout.addWidget(mouse_position_difference_control)
+        motion_border_control = self.create_motion_border_control()
+        main_layout.addWidget(motion_border_control)
         main_layout.addWidget(self.create_disable_mouse_positioning_trigger_control())
-        main_layout.addWidget(self.create_mouse_position_difference_control())
-        main_layout.addWidget(self.create_motion_border_control())
         main_layout.addWidget(self.create_distance_threshold_control())
+
+        self.config.mouse_positioning_mode.subscribe_and_run(lambda new_value: mouse_position_difference_control.setVisible(new_value == MousePositioningMode.RELATIVE))
+        self.config.mouse_positioning_mode.subscribe_and_run(lambda new_value: motion_border_control.setVisible(new_value == MousePositioningMode.ABSOLUTE))
 
     def new_percent_slider(self, reactive_property: ReactiveProperty[float], slider_min: int = 0, slider_max: int = 100) -> QSlider:
         slider = QSlider(Qt.Horizontal)
