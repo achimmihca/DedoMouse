@@ -28,6 +28,6 @@ jobs:
           name: Build executable via pyinstaller
           command: |
             pyinstaller main.spec
-            zip dist/DedoMouse.zip dist/main
+            zip -r dist/DedoMouse.zip dist/main
       - store_artifacts:
           path: dist/DedoMouse.zip
