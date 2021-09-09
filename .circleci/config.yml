@@ -22,4 +22,6 @@ jobs:
       - run:
           name: Build executable via pyinstaller
           command: |
+            ls .
+            ls src
             pyinstaller main.spec
