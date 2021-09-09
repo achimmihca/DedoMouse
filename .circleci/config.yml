@@ -20,8 +20,11 @@ jobs:
       #    name: Run tests
       #    command: pytest
       - run:
+          name: Install python development packages
+          command: |
+            apt-get install python3-dev
+            apt-get install python-dev
+      - run:
           name: Build executable via pyinstaller
           command: |
-            ls .
-            ls src
             pyinstaller main.spec
