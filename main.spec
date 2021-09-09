@@ -9,7 +9,7 @@ def get_mediapipe_path():
     mediapipe_path = mediapipe.__path__[0]
     return mediapipe_path
 
-a = Analysis(['src\\main.py'],
+a = Analysis(['src/main.py'],
              pathex=['.\\'],
              binaries=[],
              datas=[('LICENSE', '.'), ('README.md', '.'), ('styles.qss', '.'), ('images', 'images')],
