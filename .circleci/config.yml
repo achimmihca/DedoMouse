@@ -1,0 +1,26 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@1.2
+
+workflows:
+  dedomouse_workflow:
+    jobs:
+      - build-and-test
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      #- run:
+      #    name: Run tests
+      #    command: pytest
+      - run:
+          name: Build executable via pyinstaller
+          command: |
+            . DedoMouse/bin/activate
+            pyinstaller main.spec
