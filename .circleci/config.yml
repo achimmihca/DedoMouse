@@ -28,3 +28,5 @@ jobs:
           name: Build executable via pyinstaller
           command: |
             pyinstaller main.spec
+      - store_artifacts:
+          path: dist
