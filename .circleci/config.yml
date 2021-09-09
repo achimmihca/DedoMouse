@@ -22,6 +22,4 @@ jobs:
       - run:
           name: Build executable via pyinstaller
           command: |
-            ls .
-            bin/activate
             pyinstaller main.spec
