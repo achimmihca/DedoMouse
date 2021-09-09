@@ -22,5 +22,6 @@ jobs:
       - run:
           name: Build executable via pyinstaller
           command: |
-            . DedoMouse/bin/activate
+            ls .
+            bin/activate
             pyinstaller main.spec
