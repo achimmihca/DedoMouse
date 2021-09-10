@@ -34,7 +34,7 @@ jobs:
 
   build-executable:
     docker:
-      - image: cimg/python:3.9
+      - image: kuralabs/python3-dev:latest
     steps:
       - checkout
       - python/install-packages:
