@@ -6,7 +6,8 @@ orbs:
 workflows:
   dedomouse_workflow:
     jobs:
-      - build-and-test:
+      - build-and-test
+      - build-executable:
           filters:
             branches:
               only: main
@@ -14,15 +15,30 @@ workflows:
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.8
+      - image: cimg/python:3.9
     steps:
       - checkout
       - python/install-packages:
           pkg-manager: pip
-      # TODO: run mypy and pylint
-      #- run:
+      - run:
+        name: Run mypy
+        command: |
+          mypy
+      - run:
+        name: Run pylint
+        command: |
+          pylint --rcfile=.pylintrc src
+      # - run:
       #    name: Run tests
       #    command: pytest
+
+    build-executable:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           name: Install python development packages
           command: |
