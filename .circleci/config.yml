@@ -6,7 +6,7 @@ orbs:
 workflows:
   dedomouse_workflow:
     jobs:
-      - build-and-test
+      #- build-and-test
       - build-executable:
           filters:
             branches:
