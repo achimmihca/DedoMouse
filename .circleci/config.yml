@@ -6,7 +6,7 @@ orbs:
 workflows:
   dedomouse_workflow:
     jobs:
-      #- build-and-test
+      - build-and-test
       - build-executable:
           filters:
             branches:
@@ -34,7 +34,7 @@ jobs:
 
   build-executable:
     docker:
-      - image: kuralabs/python3-dev:latest
+      - image: cimg/python:3.9
     steps:
       - checkout
       - python/install-packages:
