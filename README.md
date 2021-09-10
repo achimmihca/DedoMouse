@@ -1,3 +1,6 @@
+[![CircleCI](https://circleci.com/gh/achimmihca/DedoMouse.svg?style=svg)](https://github.com/achimmihca/DedoMouse)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/achimmihca/DedoMouse/blob/master/LICENSE)
+
 # DedoMouse
 DedoMouse let's you control your computer mouse with your hands and a webcam.
 
