@@ -1,6 +1,6 @@
 from typing import Callable
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtWidgets import QTabWidget, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QLayout, QScrollArea, QSizePolicy, QGroupBox
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QLayout
 from common.Config import Config
 from common.LogHolder import LogHolder
 from .SettingsWidget import SettingsWidget

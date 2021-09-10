@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Any, List
 from itertools import chain
-import mediapipe # type: ignore
 from .Vector import Vector
 from .FingerPosition import FingerPosition
 import common.GestureRecognizer as GestureRecognizer

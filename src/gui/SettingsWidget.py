@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QScrollArea, QSizePolicy, QGroupBox, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QScrollArea
 from common.LogHolder import LogHolder
 from common.Config import Config
 from .MiscSettingsWidget import MiscSettingsWidget

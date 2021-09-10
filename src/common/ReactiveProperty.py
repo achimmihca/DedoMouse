@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Optional, TypeVar, Union, Callable
+from typing import Any, Optional, TypeVar, Union
 from rx.core import typing
 from rx.core.typing import Observable
 from rx.subject.subject import Subject

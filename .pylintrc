@@ -42,7 +42,7 @@ suggestion-mode=yes
 
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
-unsafe-load-any-extension=no
+unsafe-load-any-extension=yes
 
 
 [MESSAGES CONTROL]
@@ -60,7 +60,22 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=too-many-instance-attributes,
+disable=unused-argument,
+        too-many-boolean-expressions,
+        no-member,
+        c-extension-no-member,
+        consider-using-from-import,
+        wrong-import-order,
+        import-error,
+        ungrouped-imports,
+        duplicate-code,
+        no-self-use,
+        attribute-defined-outside-init,
+        f-string-without-interpolation,
+        too-many-public-methods,
+        unnecessary-lambda,
+        no-name-in-module,
+        too-many-instance-attributes,
         broad-except,
         logging-fstring-interpolation,
         no-else-return,

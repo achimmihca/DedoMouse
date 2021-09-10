@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QComboBox, QSpinBox, QGroupBox, QGridLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QComboBox, QSpinBox, QGroupBox
 from common.Config import Config
 from common.LogHolder import LogHolder
 from common.Vector import Vector

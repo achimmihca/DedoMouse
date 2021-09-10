@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Any
-import mediapipe # type: ignore
 from .Vector import Vector
 
 class FingerPosition:

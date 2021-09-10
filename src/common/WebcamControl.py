@@ -67,14 +67,14 @@ class WebcamControl(LogHolder):
         while self.config.running.value and (not self.is_restart_video_capture):
             if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM
                     or not self.config.capture_source_url.value.endswith(".jpg")):
-                ret, frame = self.cap.read()
+                ret, frame = self.cap.read() # pylint: disable=unused-variable
             else:
                 try:
-                    img_resp = urllib.request.urlopen(self.config.capture_source_url.value)
-                    img_np = np.array(bytearray(img_resp.read()), dtype=np.uint8)
-                    frame = cv2.imdecode(img_np, -1)
-                    h, w, c = frame.shape
-                    self.actual_capture_size = Vector(w, h)
+                    with urllib.request.urlopen(self.config.capture_source_url.value) as img_resp:
+                        img_np = np.array(bytearray(img_resp.read()), dtype=np.uint8)
+                        frame = cv2.imdecode(img_np, -1)
+                        h, w, c = frame.shape # pylint: disable=unused-variable
+                        self.actual_capture_size = Vector(w, h)
                 except Exception:
                     self.log.exception("Could not access frame from URL")
                     return f"Could not access frame from URL: {self.config.capture_source_url.value}"

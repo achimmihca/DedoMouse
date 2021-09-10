@@ -1,6 +1,5 @@
 from typing import List
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QSlider, QFormLayout, QGroupBox, QLineEdit, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QGroupBox, QLineEdit
 from common.Config import Config
 from common.ReactiveProperty import ReactiveProperty
 from common.LogHolder import LogHolder

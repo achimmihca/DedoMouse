@@ -1,6 +1,3 @@
-from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QToolButton, QSizePolicy
 from typing import Any, List
 from common.Config import Config
 from common.LogHolder import LogHolder

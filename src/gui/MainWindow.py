@@ -7,10 +7,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMainWindow, QLabel
 from common.version import version
 import common.AppContext as AppContext
-from common.Config import Config
 from common.Config import VideoCaptureSource
 from common.LogHolder import LogHolder
-from common.WebcamControl import WebcamControl
 from common.Vector import Vector
 from common.ReactiveProperty import ReactiveProperty
 from .MainWidget import MainWidget
@@ -106,7 +104,10 @@ class MainWindow(QMainWindow, LogHolder):
 
     def update_video_settings_label(self, new_value: Any) -> None:
         if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):
-            self.video_settings_label.setText(f"Video: {self.app_context.webcam_control.actual_capture_size.x}x{self.app_context.webcam_control.actual_capture_size.y}@{self.app_context.webcam_control.fps}")
+            w = self.app_context.webcam_control.actual_capture_size.x
+            h = self.app_context.webcam_control.actual_capture_size.y
+            fps = self.app_context.webcam_control.fps
+            self.video_settings_label.setText(f"Video: {w}x{h}@{fps}")
         else:
             self.video_settings_label.setText(f"Video: {self.config.capture_source_url.value}")
 
