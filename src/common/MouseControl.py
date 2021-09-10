@@ -55,7 +55,7 @@ class MouseControl(LogHolder):
         elif self.config.mouse_positioning_mode.value == MousePositioningMode.ABSOLUTE:
             self._handle_new_mouse_position_via_absolute_positioning(new_mouse_px)
 
-    def _handle_new_mouse_position_via_absolute_positioning(self, new_mouse_px: Vector):
+    def _handle_new_mouse_position_via_absolute_positioning(self, new_mouse_px: Vector) -> None:
         if self.config.is_control_mouse_position.value and not self.config.is_all_control_disabled.value:
             delta_time_seconds = (get_time_ms() - self.last_mouse_position_time_ms) / 1000
             current_pos = Vector.from_tuple2(mouse.get_position())
@@ -64,7 +64,7 @@ class MouseControl(LogHolder):
             mouse.move(smooth_mouse_x, smooth_mouse_y)
             self.last_mouse_position_time_ms = get_time_ms()
 
-    def _handle_new_mouse_position_via_relative_positioning(self, new_mouse_px: Vector):
+    def _handle_new_mouse_position_via_relative_positioning(self, new_mouse_px: Vector) -> None:
         min_distance_px: float = self.app_context.webcam_control.actual_capture_size.x * self.config.min_mouse_position_difference_percent.value
         if self.config.is_control_mouse_position.value and not self.config.is_all_control_disabled.value:
             if not self.last_mouse_position:
