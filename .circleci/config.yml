@@ -16,6 +16,7 @@ jobs:
       - checkout
       - python/install-packages:
           pkg-manager: pip
+      # TODO: run mypy and pylint
       #- run:
       #    name: Run tests
       #    command: pytest
@@ -28,6 +29,10 @@ jobs:
           name: Build executable via pyinstaller
           command: |
             pyinstaller main.spec
-            zip -r dist/DedoMouse.zip dist/main
+      - run:
+          name: Zip build artifact
+          command: |
+            mv dist/main ./DedoMouse
+            zip -r DedoMouse.zip DedoMouse
       - store_artifacts:
-          path: dist/DedoMouse.zip
+          path: DedoMouse.zip
