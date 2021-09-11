@@ -30,7 +30,7 @@ jobs:
             pylint --rcfile=.pylintrc src
       # - run:
       #    name: Run tests
-      #    command: pytest
+      #    command: pytest 
 
   build-executable:
     docker:
