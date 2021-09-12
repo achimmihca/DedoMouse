@@ -86,7 +86,7 @@ jobs:
            - requirements-cache-1-{{ checksum "requirements.txt" }}
       - run:
           name: Build executable via pyinstaller
-          command: .\env\Scripts\pyinstaller main.spec
+          command: pyinstaller main.spec
       - run:
           name: Zip build artifact
           command: |
