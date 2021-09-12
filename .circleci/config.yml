@@ -2,15 +2,20 @@ version: 2.1
 
 orbs:
   python: circleci/python@1.2
+  win: circleci/windows@2.2.0
 
 workflows:
   dedomouse_workflow:
     jobs:
-      - build-and-test
-      - build-executable:
+      # - build-and-test
+      # - build-executable-linux:
+      #     filters:
+      #       branches:
+      #         only: main
+      - build-executable-windows:
           filters:
-            branches:
-              only: main
+                branches:
+                  only: main
 
 jobs:
   build-and-test:
@@ -32,7 +37,7 @@ jobs:
       #    name: Run tests
       #    command: pytest 
 
-  build-executable:
+  build-executable-linux:
     docker:
       - image: achimmihca/circleci-python-dev:3.8
     steps:
@@ -48,5 +53,25 @@ jobs:
           command: |
             mv dist/main ./DedoMouse
             zip -r DedoMouse.zip DedoMouse
+      - store_artifacts:
+          path: DedoMouse.zip
+
+  build-executable-windows:
+    executor: win/default
+    steps:
+      - checkout
+      - run:
+          name: Install Requirements
+          command: pip install -r requirements.txt
+      - restore_cache:
+         keys:
+           - requirements-cache-1-{{ checksum "requirements.txt" }}
+      - run:
+          name: Build executable via pyinstaller
+          command: pyinstaller main.spec
+      - run:
+          name: Zip build artifact
+          command: |
+            Compress-Archive -Path .\dist\main\* -DestinationPath .\DedoMouse.zip
       - store_artifacts:
           path: DedoMouse.zip
