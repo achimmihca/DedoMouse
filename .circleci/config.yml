@@ -81,9 +81,6 @@ jobs:
           name: Install Requirements
           command: |
             ~\scoop\apps\python\current\Scripts\pip install -r requirements.txt
-      - restore_cache:
-         keys:
-           - requirements-cache-1-{{ checksum "requirements.txt" }}
       - run:
           name: Build executable via pyinstaller
           command: pyinstaller main.spec
