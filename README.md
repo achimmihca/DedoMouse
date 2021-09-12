@@ -15,7 +15,7 @@ You are encouraged to contribute code.
 The following explains how to set up a development environment.
 
 ### Python Setup
-- Install a recent version of Python (3.9.x or newer)
+- Install a recent version of Python (3.8 or newer)
 - Clone the repo and navigate to the project folder
 - Create a virtual environment: `python -m venv env`
 - Activate the virtual environment: `env/Scripts/activate.bat` (`.bat` only on Windows)
