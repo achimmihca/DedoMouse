@@ -60,19 +60,20 @@ jobs:
     executor: win/default
     steps:
       - checkout
-      - run: Remove old python version from PATH
-        command: |
-          $env:PATH = $env:PATH -Replace "python", "python_that_should_be_ignored"
       - run:
-        name: Install scoop
-        command: |
-          Set-ExecutionPolicy RemoteSigned -scope CurrentUser
-          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+          name: Remove old python version from PATH
+          command: |
+            $env:PATH = $env:PATH -Replace "python", "python_that_should_be_ignored"
       - run:
-        name: Install latest python via scoop
-        command: |
-          scoop bucket add extras
-          scoop install python
+          name: Install scoop
+          command: |
+            Set-ExecutionPolicy RemoteSigned -scope CurrentUser
+            Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+      - run:
+          name: Install latest python via scoop
+          command: |
+            scoop bucket add extras
+            scoop install python
       - run:
           name: Install Requirements
           command: pip install -r requirements.txt
