@@ -64,6 +64,7 @@ jobs:
           name: Remove old python version from PATH
           command: |
             $env:PATH = $env:PATH -Replace "python", "python_that_should_be_ignored"
+            echo $env:PATH
       - run:
           name: Install scoop
           command: |
@@ -74,15 +75,18 @@ jobs:
           command: |
             scoop bucket add extras
             scoop install python
+            dir ~/scoop/apps
       - run:
           name: Install Requirements
-          command: pip install -r requirements.txt
+          command:|
+            ~\scoop\apps\python\current\Scripts\pip install -r requirements.txt
+            .\env\Scripts\activate.ps1
       - restore_cache:
          keys:
            - requirements-cache-1-{{ checksum "requirements.txt" }}
       - run:
           name: Build executable via pyinstaller
-          command: pyinstaller main.spec
+          command: .\env\Scripts\pyinstaller main.spec
       - run:
           name: Zip build artifact
           command: |
