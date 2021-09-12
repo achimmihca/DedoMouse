@@ -78,7 +78,7 @@ jobs:
             dir ~/scoop/apps
       - run:
           name: Install Requirements
-          command:|
+          command: |
             ~\scoop\apps\python\current\Scripts\pip install -r requirements.txt
             .\env\Scripts\activate.ps1
       - restore_cache:
