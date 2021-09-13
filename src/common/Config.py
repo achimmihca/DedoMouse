@@ -71,7 +71,7 @@ class Config:
         # A drag gesture is started when a click is held for at least this duration.
         self.drag_start_click_delay_ms = ReactiveProperty(1000)
 
-        self.is_control_mouse_position = ReactiveProperty(False)
+        self.is_control_mouse_position = ReactiveProperty(True)
         self.is_control_click = ReactiveProperty(False)
         self.is_control_scroll = ReactiveProperty(False)
         self.is_all_control_disabled = ReactiveProperty(False)

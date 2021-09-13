@@ -7,11 +7,11 @@ orbs:
 workflows:
   dedomouse_workflow:
     jobs:
-      # - build-and-test
-      # - build-executable-linux:
-      #     filters:
-      #       branches:
-      #         only: main
+      - build-and-test
+      - build-executable-linux:
+          filters:
+            branches:
+              only: main
       - build-executable-windows:
           filters:
                 branches:
