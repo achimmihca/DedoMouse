@@ -14,8 +14,8 @@ workflows:
               only: main
       - build-executable-windows:
           filters:
-                branches:
-                  only: main
+            branches:
+              only: main
 
 jobs:
   build-and-test:
