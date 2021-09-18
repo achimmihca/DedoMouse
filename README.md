@@ -4,7 +4,7 @@
 # DedoMouse
 DedoMouse let's you control your computer mouse with your hands and a webcam.
 
-<img src="images/DedoMouse-demo.gif" alt="DedoMouse-Demo" style="width: 50%; min-width: 500px;"></src>
+<img src="images/DedoMouse-demo.gif" alt="DedoMouse-Demo" style="max-width: 100%; max-height: 100%; width: 600px; height: 100%;"></src>
 
 Therefor, it uses the hand and finger tracking of Google's [MediaPipe](https://google.github.io/mediapipe/solutions/hands).
 
