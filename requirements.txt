@@ -1,7 +1,7 @@
 mediapipe==0.8.5
 numpy==1.20.3
 opencv-python==4.5.2.52
-mouse==0.7.1
+pyautogui==0.9.53
 keyboard==0.13.5
 screeninfo==0.6.7
 jsonpickle==2.0.0

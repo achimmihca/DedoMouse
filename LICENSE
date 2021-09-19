@@ -30,7 +30,7 @@ However, licenses of the used libraries (see requirements.txt) and resources (e.
 - rxpy: [Apache License v2.0](https://github.com/Reactive-Extensions/RxPy/blob/master/LICENSE)
 - screeninfo: [MIT](https://github.com/rr-/screeninfo/blob/master/LICENSE.md)
 - keyboard: [MIT](https://github.com/boppreh/keyboard/blob/master/LICENSE.txt)
-- mouse: [MIT](https://github.com/boppreh/mouse/blob/master/LICENSE.txt)
+- pyautogui: [BSD](https://github.com/asweigart/pyautogui/blob/master/LICENSE.txt)
 - jsonpickle: [BSD](https://github.com/jsonpickle/jsonpickle/blob/main/LICENSE)
 - numpy: [NumPy License (similar to BSD)](https://numpy.org/doc/stable/license.html)
 - pyside6: [LGPL/GPL v3.0](https://wiki.qt.io/PySide2)
