@@ -6,4 +6,12 @@ orbs:
 
 workflows:
   dedomouse_workflow:
-    jobs: [] # no jobs on gh-pages branch
+    jobs:
+      - noop
+
+jobs:
+  noop:
+    docker:
+      - image: cimg/python:3.8
+    steps: 
+      - checkout
