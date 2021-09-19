@@ -5,6 +5,8 @@ from common.Config import MousePositioningMode
 from common.Config import DisableMousePositioningTrigger
 from common.ReactiveProperty import ReactiveProperty
 from common.LogHolder import LogHolder
+from common.Vector import Vector
+from .MonitorSettingsWidget import MonitorDimensionSpinBox
 from .qt_util import new_label
 
 class GeometrySettingsWidget(QWidget, LogHolder):
@@ -16,15 +18,22 @@ class GeometrySettingsWidget(QWidget, LogHolder):
         self.setLayout(main_layout)
 
         main_layout.addWidget(self.create_mouse_positioning_control())
+
         mouse_position_difference_control = self.create_mouse_position_difference_control()
         main_layout.addWidget(mouse_position_difference_control)
+
         motion_border_control = self.create_motion_border_control()
         main_layout.addWidget(motion_border_control)
+
+        monitor_offset_group = self.create_monitor_offset_group()
+        main_layout.addWidget(monitor_offset_group)
+
         main_layout.addWidget(self.create_disable_mouse_positioning_trigger_control())
         main_layout.addWidget(self.create_distance_threshold_control())
 
         self.config.mouse_positioning_mode.subscribe_and_run(lambda new_value: mouse_position_difference_control.setVisible(new_value == MousePositioningMode.RELATIVE))
         self.config.mouse_positioning_mode.subscribe_and_run(lambda new_value: motion_border_control.setVisible(new_value == MousePositioningMode.ABSOLUTE))
+        self.config.mouse_positioning_mode.subscribe_and_run(lambda new_value: monitor_offset_group.setVisible(new_value == MousePositioningMode.ABSOLUTE))
 
     def new_percent_slider(self, reactive_property: ReactiveProperty[float], slider_min: int = 0, slider_max: int = 100) -> QSlider:
         slider = QSlider(Qt.Horizontal)
@@ -167,3 +176,28 @@ class GeometrySettingsWidget(QWidget, LogHolder):
         form_layout.addRow(new_label("Low", "Low distance threshold"), distance_low_slider)
         form_layout.addRow(new_label("High", "High distance threshold"), distance_high_slider)
         return group
+
+    def create_monitor_offset_group(self) -> QWidget:
+        group = QGroupBox("Absolute Positioning Offset")
+        form_layout = QFormLayout()
+        group.setLayout(form_layout)
+
+        self.monitor_offset_x_spinner = MonitorDimensionSpinBox()
+        self.monitor_offset_y_spinner = MonitorDimensionSpinBox()
+        form_layout.addRow(new_label("Offset X (Pixels)", "Sum of all monitor widths that are left of the target monitor"),
+                              self.monitor_offset_x_spinner)
+        form_layout.addRow(new_label("Offset Y (Pixels)", "Sum of all monitor heights that are below the target monitor"),
+                              self.monitor_offset_y_spinner)
+
+        self.config.screen_offset.subscribe_and_run(self.update_controls_of_screen_offset)
+        self.monitor_offset_x_spinner.valueChanged.connect(self.update_config_by_screen_offset)
+        self.monitor_offset_y_spinner.valueChanged.connect(self.update_config_by_screen_offset)
+
+        return group
+
+    def update_controls_of_screen_offset(self, new_screen_offset: Vector) -> None:
+        self.monitor_offset_x_spinner.setValue(int(new_screen_offset.x))
+        self.monitor_offset_y_spinner.setValue(int(new_screen_offset.y))
+
+    def update_config_by_screen_offset(self) -> None:
+        self.config.screen_offset.value = Vector(self.monitor_offset_x_spinner.value(), self.monitor_offset_y_spinner.value())

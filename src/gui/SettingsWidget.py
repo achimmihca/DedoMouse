@@ -24,8 +24,8 @@ class SettingsWidget(QScrollArea, LogHolder):
         content_widget.setLayout(content_layout)
 
         content_layout.addWidget(MiscSettingsWidget(self.config))
-        content_layout.addWidget(MonitorSettingsWidget(self.config))
         content_layout.addWidget(GeometrySettingsWidget(self.config))
+        content_layout.addWidget(MonitorSettingsWidget(self.config))
         content_layout.addWidget(VideoSettingsWidget(self.config))
         content_layout.addWidget(ShortcutsSettingsWidget(self.config))
 

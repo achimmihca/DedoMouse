@@ -12,13 +12,11 @@ class MonitorSettingsWidget(QWidget, LogHolder):
         self.config = config
 
         monitor_size_group = self.create_monitor_size_group()
-        monitor_offset_group = self.create_monitor_offset_group()
 
         # Layout
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
         main_layout.addWidget(monitor_size_group)
-        main_layout.addWidget(monitor_offset_group)
 
     def create_monitor_size_group(self) -> QWidget:
         group = QGroupBox("Monitor Size")
@@ -50,31 +48,6 @@ class MonitorSettingsWidget(QWidget, LogHolder):
         self.monitor_size_y_spinner.valueChanged.connect(self.update_config_by_screen_size)
 
         return group
-
-    def create_monitor_offset_group(self) -> QWidget:
-        group = QGroupBox("Monitor Offset")
-        form_layout = QFormLayout()
-        group.setLayout(form_layout)
-
-        self.monitor_offset_x_spinner = MonitorDimensionSpinBox()
-        self.monitor_offset_y_spinner = MonitorDimensionSpinBox()
-        form_layout.addRow(new_label("Offset X (Pixels)", "Sum of all monitor widths that are left of the target monitor"),
-                              self.monitor_offset_x_spinner)
-        form_layout.addRow(new_label("Offset Y (Pixels)", "Sum of all monitor heights that are below the target monitor"),
-                              self.monitor_offset_y_spinner)
-
-        self.config.screen_offset.subscribe_and_run(self.update_controls_of_screen_offset)
-        self.monitor_offset_x_spinner.valueChanged.connect(self.update_config_by_screen_offset)
-        self.monitor_offset_y_spinner.valueChanged.connect(self.update_config_by_screen_offset)
-
-        return group
-
-    def update_controls_of_screen_offset(self, new_screen_offset: Vector) -> None:
-        self.monitor_offset_x_spinner.setValue(int(new_screen_offset.x))
-        self.monitor_offset_y_spinner.setValue(int(new_screen_offset.y))
-
-    def update_config_by_screen_offset(self) -> None:
-        self.config.screen_offset.value = Vector(self.monitor_offset_x_spinner.value(), self.monitor_offset_y_spinner.value())
 
     def update_controls_of_screen_size(self, new_screen_size: Vector) -> None:
         self.monitor_size_x_spinner.setValue(int(new_screen_size.x))
