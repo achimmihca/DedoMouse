@@ -7,6 +7,7 @@ from .MonitorSettingsWidget import MonitorSettingsWidget
 from .VideoSettingsWidget import VideoSettingsWidget
 from .ShortcutsSettingsWidget import ShortcutsSettingsWidget
 from .GeometrySettingsWidget import GeometrySettingsWidget
+from .HelpSettingsWidget import HelpSettingsWidget
 
 class SettingsWidget(QScrollArea, LogHolder):
     def __init__(self, config: Config) -> None:
@@ -28,5 +29,6 @@ class SettingsWidget(QScrollArea, LogHolder):
         content_layout.addWidget(MonitorSettingsWidget(self.config))
         content_layout.addWidget(VideoSettingsWidget(self.config))
         content_layout.addWidget(ShortcutsSettingsWidget(self.config))
+        content_layout.addWidget(HelpSettingsWidget(self.config))
 
         return content_widget

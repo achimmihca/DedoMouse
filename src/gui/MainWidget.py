@@ -45,12 +45,12 @@ class MainWidget(QWidget, LogHolder):
         control_click_toggle = ConfigVariableToggleButton(self.config,
                                                           f"{self.config.is_control_click=}",
                                                           "images/svg/control-click.svg",
-                                                          "Control click",
+                                                          "Control mouse clicks",
                                                           self.config.toggle_control_click_shortcuts.value)
         control_scroll_toggle = ConfigVariableToggleButton(self.config,
                                                            f"{self.config.is_control_scroll=}",
                                                            "images/svg/control-scroll.svg",
-                                                           "Control scroll",
+                                                           "Control mouse scrolling",
                                                            self.config.toggle_control_scroll_shortcuts.value)
         control_disable_all_toggle = ConfigVariableToggleButton(self.config,
                                                                 f"{self.config.is_all_control_disabled=}",

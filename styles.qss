@@ -7,6 +7,11 @@ QLabel[cssClass=highlight] {
     color: red;
 }
 
+QLabel[cssClass=title_column] {
+    font-weight: bold;
+    font-style: italic;
+}
+
 QToolButton:checked {
     border-width: 5px;
 }

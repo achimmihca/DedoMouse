@@ -173,8 +173,9 @@ class GeometrySettingsWidget(QWidget, LogHolder):
         form_layout = QFormLayout()
         group_layout.addLayout(form_layout)
 
-        form_layout.addRow(new_label("Low", "Low distance threshold"), distance_low_slider)
-        form_layout.addRow(new_label("High", "High distance threshold"), distance_high_slider)
+        distance_tooltip = "Move fingers from high-distance to low-distance to trigger a click."
+        form_layout.addRow(new_label("Low", distance_tooltip), distance_low_slider)
+        form_layout.addRow(new_label("High", distance_tooltip), distance_high_slider)
         return group
 
     def create_monitor_offset_group(self) -> QWidget:
