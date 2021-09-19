@@ -1,0 +1,9 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@1.2
+  win: circleci/windows@2.2.0
+
+workflows:
+  dedomouse_workflow:
+    jobs: [] # no jobs on gh-pages branch
