@@ -20,7 +20,7 @@ class WebcamControl(LogHolder):
         self.app_context = app_context
         self.config = app_context.config
         self.actual_capture_size = self.config.capture_size.value
-        self.fps = self.config.capture_fps.value
+        self.actual_fps = self.config.capture_fps.value
         self.gesture_recognizer = app_context.gesture_recognizer
         self.frame_analyzed_callbacks: List[Callable[[Any, Vector], None]] = []
         self.restart_video_capture_callbacks: List[Callable[[], None]] = []
@@ -59,7 +59,7 @@ class WebcamControl(LogHolder):
             if setup_result is not None:
                 return setup_result
 
-        pause_in_millis = int(1000 / self.fps)
+        pause_in_millis = int(1000 / self.actual_fps)
 
         self.log.info("starting video capture analysis loop")
         # LOOP START
@@ -130,7 +130,6 @@ class WebcamControl(LogHolder):
         width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.actual_capture_size = Vector(width, height)
-        self.config.capture_size.value = self.actual_capture_size
         if (width == 0 or height == 0):
             return "Width or height of video is zero"
 
@@ -138,21 +137,19 @@ class WebcamControl(LogHolder):
                 and (self.config.capture_size.value.x != width
                      or self.config.capture_size.value.y != height)):
             self.log.warning(f"Configured video size {self.config.capture_size.value.x}x{self.config.capture_size.value.y} does not match actual video size {width}x{height}")
-            self.config.capture_size.value = self.actual_capture_size
 
         if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM
-                and self.config.capture_fps.value != self.fps):
-            self.log.warning(f"Configured frames per second {self.config.capture_fps.value} does not match actual frames per second {self.fps}")
+                and self.config.capture_fps.value != self.actual_fps):
+            self.log.warning(f"Configured frames per second {self.config.capture_fps.value} does not match actual frames per second {self.actual_fps}")
 
-        self.fps = self.cap.get(cv2.CAP_PROP_FPS)
-        if (self.fps == 0):
+        self.actual_fps = self.cap.get(cv2.CAP_PROP_FPS)
+        if (self.actual_fps == 0):
             return "FPS of video is zero"
-        if (self.fps > 30):
-            self.log.info(f"Unexpected high FPS: {self.fps}. Assuming 30 instead.")
-            self.fps = 30
-        self.config.capture_fps.value = self.fps
+        if (self.actual_fps > 30):
+            self.log.info(f"Unexpected high FPS: {self.actual_fps}. Assuming 30 instead.")
+            self.actual_fps = 30
 
-        self.log.info(f"Capturing video (width: {width}, height: {height}, fps: {self.fps})")
+        self.log.info(f"Capturing video (width: {width}, height: {height}, fps: {self.actual_fps})")
 
         return None
 

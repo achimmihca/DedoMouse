@@ -106,7 +106,7 @@ class MainWindow(QMainWindow, LogHolder):
         if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):
             w = self.app_context.webcam_control.actual_capture_size.x
             h = self.app_context.webcam_control.actual_capture_size.y
-            fps = self.app_context.webcam_control.fps
+            fps = self.app_context.webcam_control.actual_fps
             self.video_settings_label.setText(f"Video: {w}x{h}@{fps}")
         else:
             self.video_settings_label.setText(f"Video: {self.config.capture_source_url.value}")
