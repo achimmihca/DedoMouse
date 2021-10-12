@@ -59,6 +59,8 @@ class Config:
         # Distance percent of capture_size.
         self.click_distance_threshold_low_percent = ReactiveProperty(0.05)
         self.click_distance_threshold_high_percent = ReactiveProperty(self.click_distance_threshold_low_percent.value * 1.5)
+        # Time to hold click gesture before it counts as a click action
+        self.click_delay_ms = ReactiveProperty(0)
         # Min time between two single click gestures.
         self.single_click_pause_ms = ReactiveProperty(600)
         # Max time between two single click gestures for triggering a double click.

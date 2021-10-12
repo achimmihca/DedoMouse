@@ -13,6 +13,8 @@ from .ReactiveProperty import ReactiveProperty
 from .Vector import Vector
 from .HandFingerPositions import HandFingerPositions
 from .FingerPosition import FingerPosition
+from .SignalFlankRecognizer import SignalFlankRecognizer
+from .SignalHoldRecognizer import SignalHoldRecognizer
 
 class GestureRecognizer(LogHolder):
     wrist_index = 0
@@ -30,9 +32,12 @@ class GestureRecognizer(LogHolder):
 
         self.mediapipe_hands = mediapipe.solutions.hands.Hands(max_num_hands=1)
 
+        self.is_potential_left_click_gesture = False
+        self.last_index_near_thumb_gesture_time_ms = 0
         self.last_left_click_time_ms = 0
         self.last_right_click_time_ms = 0
         self.last_middle_click_time_ms = 0
+        self.potential_left_click_start_time_ms = 0
         self.allow_left_click = False
         self.allow_right_click = False
         self.allow_middle_click = False
@@ -52,6 +57,30 @@ class GestureRecognizer(LogHolder):
         # Then this duration is waited until finger tracking is stable again.
         self.jitter_pause_time_ms = ReactiveProperty(0.0)
         self.last_frame_analysis_time_ms = get_time_ms()
+
+        # gesture flank recognizers
+        self.index_near_thumb_flank_recognizer = SignalFlankRecognizer(False)
+        self.middle_and_ring_near_thumb_flank_recognizer = SignalFlankRecognizer(False)
+        self.ring_and_pinky_near_thumb_flank_recognizer = SignalFlankRecognizer(False)
+
+        # left click gesture
+        self.left_click_gesture_recognizer = SignalHoldRecognizer(self.index_near_thumb_flank_recognizer, lambda: self.config.click_delay_ms.value)
+        self.left_click_gesture_recognizer.hold_high_event_stream.subscribe(self.on_left_click_gesture_change)
+
+        # double click gesture
+        self.index_near_thumb_flank_recognizer.rising_flank_event_stream.subscribe(self.on_index_near_thumb_rising_flank)
+
+        # drag gesture
+        self.drag_gesture_recognizer = SignalHoldRecognizer(self.index_near_thumb_flank_recognizer, lambda: self.config.click_delay_ms.value + self.config.drag_start_click_delay_ms.value)
+        self.drag_gesture_recognizer.hold_high_event_stream.subscribe(self.on_drag_gesture_change)
+
+        # right click gesture
+        self.right_click_gesture_recognizer = SignalHoldRecognizer(self.middle_and_ring_near_thumb_flank_recognizer, lambda: self.config.click_delay_ms.value)
+        self.right_click_gesture_recognizer.hold_high_event_stream.subscribe(self.on_right_click_gesture_change)
+
+        # middle click gesture
+        self.middle_click_gesture_recognizer = SignalHoldRecognizer(self.ring_and_pinky_near_thumb_flank_recognizer, lambda: self.config.click_delay_ms.value)
+        self.middle_click_gesture_recognizer.hold_high_event_stream.subscribe(self.on_middle_click_gesture_change)
 
     def process_frame(self, frame: Any) -> Union[HandFingerPositions, None]:
         hand_finger_positions = None
@@ -79,17 +108,25 @@ class GestureRecognizer(LogHolder):
         # detect mouse position
         self.detect_mouse_position(frame, hand_finger_positions)
 
-        # detect click
+        # detect click gestures
         current_time_ms = get_time_ms()
-        self.detect_left_click(current_time_ms, hand_finger_positions)
-        self.detect_right_click(current_time_ms, hand_finger_positions)
-        self.detect_middle_click(current_time_ms, hand_finger_positions)
+        is_only_index_near_thumb = self.detect_index_near_thumb_gesture(hand_finger_positions)
+        self.detect_middle_and_ring_near_thumb_gesture(hand_finger_positions)
+        self.detect_ring_and_pinky_near_thumb_gesture(hand_finger_positions)
 
-        # detect drag
-        self.detect_drag(current_time_ms, hand_finger_positions.thumb_tip_position, hand_finger_positions.index_tip_position)
+        # reset click count
+        if (not is_only_index_near_thumb
+                and self.last_index_near_thumb_gesture_time_ms + self.config.double_click_max_pause_ms.value < current_time_ms):
+            self.left_click_count = 0
 
         # detect scroll
         self.detect_scoll(current_time_ms, hand_finger_positions)
+
+        # update hold gesture recognizers
+        self.left_click_gesture_recognizer.update(current_time_ms)
+        self.right_click_gesture_recognizer.update(current_time_ms)
+        self.middle_click_gesture_recognizer.update(current_time_ms)
+        self.drag_gesture_recognizer.update(current_time_ms)
 
         return hand_finger_positions
 
@@ -165,55 +202,20 @@ class GestureRecognizer(LogHolder):
         self.was_thumb_up_last_frame = is_thumb_up
         self.was_thumb_down_last_frame = is_thumb_down
 
-    def detect_drag(self,
-            current_time_ms: int,
-            thumb_pos: FingerPosition,
-            index_finger_pos: FingerPosition) -> None:
-        # drag start gesture: holding a click gesture (index near thumb for a longer time)
-        # drag end gesture: releasing click gesture (index not near thumb anymore)
-        distance_thumb_index_percent = Vector.distance_xy(thumb_pos.percent, index_finger_pos.percent)
-
-        if (distance_thumb_index_percent > self.config.click_distance_threshold_high_percent.value):
-            self.is_potential_drag_gesture = False
-
-        if (self.is_drag_started
-                and not self.is_potential_drag_gesture):
-            self.on_end_drag()
-            return
-
-        if (not self.is_drag_started
-                and self.is_potential_drag_gesture
-                and self.left_click_start_time_ms + self.config.drag_start_click_delay_ms.value <= current_time_ms):
-            self.on_begin_drag()
-
-    def detect_left_click(self,
-            current_time_ms: int,
-            hand_finger_positions: HandFingerPositions) -> None:
-        # left-click gesture: (index finger near thumb) and (other fingers not near thumb).        
-
+    def detect_index_near_thumb_gesture(self,
+                                        hand_finger_positions: HandFingerPositions) -> bool:
         index_finger_tip = hand_finger_positions.index_finger_positions[-1]
         thumb_finger_tip = hand_finger_positions.thumb_finger_positions[-1]
-        if (self.is_faraway_target([index_finger_tip], thumb_finger_tip)):
-            self.allow_left_click = True
-
-        if (not self.allow_left_click):
-            return
-
-        if (self.last_left_click_time_ms + self.config.single_click_pause_ms.value <= current_time_ms):
-            self.left_click_count = 0
-
         middle_finger_tip = hand_finger_positions.middle_finger_positions[-1]
         ring_finger_tip = hand_finger_positions.ring_finger_positions[-1]
         pinky_finger_tip = hand_finger_positions.pinky_finger_positions[-1]
-        if (self.is_near_target([index_finger_tip], thumb_finger_tip)
-                and self.is_faraway_target([middle_finger_tip, ring_finger_tip, pinky_finger_tip], thumb_finger_tip)):
-            if (self.left_click_count == 0
-                    and self.last_left_click_time_ms + self.config.single_click_pause_ms.value <= current_time_ms):
-                self.on_left_click(current_time_ms)
-            elif (self.left_click_count == 1
-                    and current_time_ms < self.last_left_click_time_ms + self.config.double_click_max_pause_ms.value):
-                self.on_double_left_click(current_time_ms)
-    
+
+        is_only_index_near_thumb = (self.is_near_target([index_finger_tip], thumb_finger_tip)
+                                    and self.is_faraway_target([middle_finger_tip, ring_finger_tip, pinky_finger_tip], thumb_finger_tip))
+        self.index_near_thumb_flank_recognizer.set_value(is_only_index_near_thumb)
+
+        return is_only_index_near_thumb
+
     def is_faraway_target(self,
             finger_positions: List[FingerPosition],
             target_position: FingerPosition) -> bool:
@@ -234,47 +236,27 @@ class GestureRecognizer(LogHolder):
 
         return all_fingers_near_target
 
-    def detect_right_click(self,
-            current_time_ms: int,
-            hand_finger_positions: HandFingerPositions) -> None:
-        # right-click gesture: (middle and ring fingers near thumb) and (other fingers not near thumb).        
-        
+    def detect_middle_and_ring_near_thumb_gesture(self,
+                                                  hand_finger_positions: HandFingerPositions) -> None:
         middle_finger_tip = hand_finger_positions.middle_finger_positions[-1]
         ring_finger_tip = hand_finger_positions.ring_finger_positions[-1]
         thumb_finger_tip = hand_finger_positions.thumb_finger_positions[-1]
-        if (self.is_faraway_target([middle_finger_tip, ring_finger_tip], thumb_finger_tip)):
-            self.allow_right_click = True
-
-        if (not self.allow_right_click):
-            return
-
         index_finger_tip = hand_finger_positions.index_finger_positions[-1]
         pinky_finger_tip = hand_finger_positions.pinky_finger_positions[-1]
-        if (self.is_near_target([middle_finger_tip, ring_finger_tip], thumb_finger_tip)
-                and self.is_faraway_target([index_finger_tip, pinky_finger_tip], thumb_finger_tip)):
-            if (self.last_right_click_time_ms + self.config.single_click_pause_ms.value <= current_time_ms):
-                self.on_right_click(current_time_ms)
+        only_middle_and_ring_near_thumb = (self.is_near_target([middle_finger_tip, ring_finger_tip], thumb_finger_tip)
+                                           and self.is_faraway_target([index_finger_tip, pinky_finger_tip], thumb_finger_tip))
+        self.middle_and_ring_near_thumb_flank_recognizer.set_value(only_middle_and_ring_near_thumb)
 
-    def detect_middle_click(self,
-            current_time_ms: int,
-            hand_finger_positions: HandFingerPositions) -> None:
-        # middle-click gesture: (ring and pinky fingers near thumb) and (other fingers not near thumb).        
-        
+    def detect_ring_and_pinky_near_thumb_gesture(self,
+                                                 hand_finger_positions: HandFingerPositions) -> None:
         ring_finger_tip = hand_finger_positions.ring_finger_positions[-1]
         pinky_finger_tip = hand_finger_positions.pinky_finger_positions[-1]
         thumb_finger_tip = hand_finger_positions.thumb_finger_positions[-1]
-        if (self.is_faraway_target([ring_finger_tip, pinky_finger_tip], thumb_finger_tip)):
-            self.allow_middle_click = True
-
-        if (not self.allow_middle_click):
-            return
-
         index_finger_tip = hand_finger_positions.index_finger_positions[-1]
         middle_finger_tip = hand_finger_positions.middle_finger_positions[-1]
-        if (self.is_near_target([ring_finger_tip, pinky_finger_tip], thumb_finger_tip)
-                and self.is_faraway_target([index_finger_tip, middle_finger_tip], thumb_finger_tip)):
-            if (self.last_middle_click_time_ms + self.config.single_click_pause_ms.value <= current_time_ms):
-                self.on_middle_click(current_time_ms)
+        only_ring_and_pinky_near_thumb = (self.is_near_target([ring_finger_tip, pinky_finger_tip], thumb_finger_tip)
+                                          and self.is_faraway_target([index_finger_tip, middle_finger_tip], thumb_finger_tip))
+        self.ring_and_pinky_near_thumb_flank_recognizer.set_value(only_ring_and_pinky_near_thumb)
 
     def is_thumb_up(self,
             hand_finger_positions: HandFingerPositions) -> bool:
@@ -392,11 +374,15 @@ class GestureRecognizer(LogHolder):
         else:
             return 0
 
+    def on_potential_left_click(self, current_time_ms: int) -> None:
+        self.is_potential_left_click_gesture = True
+        self.potential_left_click_start_time_ms = current_time_ms
+
     def on_left_click(self, current_time_ms: int) -> None:
         self.allow_left_click = False
+        self.is_potential_left_click_gesture = False
         self.left_click_count = self.left_click_count + 1
         self.mouse_control.on_single_click_detected(MouseButton.LEFT)
-        self.is_potential_drag_gesture = True
         self.left_click_start_time_ms = current_time_ms
         self.last_left_click_time_ms = current_time_ms
 
@@ -428,6 +414,35 @@ class GestureRecognizer(LogHolder):
     def on_scroll(self, x: int, y: int, current_time_ms: int) -> None:
         self.last_scroll_time_ms = current_time_ms
         self.mouse_control.on_scroll(x, y)
+
+    def on_drag_gesture_change(self, value: bool) -> None:
+        if self.left_click_count == 1:
+            if value:
+                self.on_begin_drag()
+            else:
+                self.on_end_drag()
+
+    def on_left_click_gesture_change(self, value: bool) -> None:
+        if value and self.left_click_count == 0:
+            current_time_ms = get_time_ms()
+            self.on_left_click(current_time_ms)
+
+    def on_right_click_gesture_change(self, value: bool) -> None:
+        if value:
+            current_time_ms = get_time_ms()
+            self.on_right_click(current_time_ms)
+
+    def on_middle_click_gesture_change(self, value: bool) -> None:
+        if value:
+            current_time_ms = get_time_ms()
+            self.on_middle_click(current_time_ms)
+
+    def on_index_near_thumb_rising_flank(self, value: bool) -> None:
+        current_time_ms = get_time_ms()
+        if (self.left_click_count < 2
+                and current_time_ms < self.last_index_near_thumb_gesture_time_ms + self.config.double_click_max_pause_ms.value):
+            self.on_double_left_click(current_time_ms)
+        self.last_index_near_thumb_gesture_time_ms = current_time_ms
 
 class ThumbGestureDirection(Enum):
     UP = 1
