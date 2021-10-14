@@ -6,6 +6,7 @@ from .MiscSettingsWidget import MiscSettingsWidget
 from .MonitorSettingsWidget import MonitorSettingsWidget
 from .VideoSettingsWidget import VideoSettingsWidget
 from .ShortcutsSettingsWidget import ShortcutsSettingsWidget
+from .TimingSettingsWidget import TimingSettingsWidget
 from .GeometrySettingsWidget import GeometrySettingsWidget
 from .HelpSettingsWidget import HelpSettingsWidget
 
@@ -26,6 +27,7 @@ class SettingsWidget(QScrollArea, LogHolder):
 
         content_layout.addWidget(MiscSettingsWidget(self.config))
         content_layout.addWidget(GeometrySettingsWidget(self.config))
+        content_layout.addWidget(TimingSettingsWidget(self.config))
         content_layout.addWidget(MonitorSettingsWidget(self.config))
         content_layout.addWidget(VideoSettingsWidget(self.config))
         content_layout.addWidget(ShortcutsSettingsWidget(self.config))

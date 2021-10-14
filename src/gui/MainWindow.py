@@ -100,7 +100,7 @@ class MainWindow(QMainWindow, LogHolder):
         else:
             self.performed_action_description_count = 0
             new_jitter_pause_time_seconds = new_jitter_pause_time_ms / 1000
-            self.performed_action_description_label.setText(f"pause: {new_jitter_pause_time_seconds:.1} s")
+            self.performed_action_description_label.setText(f"pause: {new_jitter_pause_time_seconds:.1f} s")
 
     def update_video_settings_label(self, new_value: Any) -> None:
         if (self.config.capture_source.value == VideoCaptureSource.INTEGRATED_WEBCAM):

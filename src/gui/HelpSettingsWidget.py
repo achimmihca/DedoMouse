@@ -18,6 +18,7 @@ class HelpSettingsWidget(QWidget, LogHolder):
         self.add_label_row(grid_layout, ["Right Click", "Move middle and ring finger near thumb."])
         self.add_label_row(grid_layout, ["Middle Click", "Move ring finger and pinky near thumb."])
         self.add_label_row(grid_layout, ["Scroll Up/Down", "Make thumb up/down gesture."])
+        self.add_label_row(grid_layout, ["Drag", "Hold left click gesture."])
 
         # Layout
         main_layout = QVBoxLayout()
