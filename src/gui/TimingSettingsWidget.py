@@ -27,17 +27,23 @@ class TimingSettingsWidget(QWidget, LogHolder):
 
         # Widgets
         click_delay_slider = self.create_click_delay_slider()
-        click_delay_label = new_label(self.click_delay_label_template, "Time to hold click gesture to trigger a mouse click")
-        self.config.click_delay_ms.subscribe_and_run(lambda value: click_delay_label.setText(self.click_delay_label_template.replace("{value}", f"{(value/1000.0):.2f}")))
+        click_delay_label = new_label(self.click_delay_label_template,
+                                      "Time to hold click gesture to trigger a mouse click")
+        self.config.click_delay_ms.subscribe_and_run(
+            lambda value: click_delay_label.setText(self.click_delay_label_template.replace("{value}", f"{(value/1000.0):.2f}")))
 
         double_click_max_pause_slider = self.create_double_click_max_pause_slider()
-        double_click_max_pause_label = new_label(self.double_click_max_pause_label_template, "Maximum time between two click gestures to trigger a mouse double click")
-        self.config.double_click_max_pause_ms.subscribe_and_run(lambda value: double_click_max_pause_label.setText(self.double_click_max_pause_label_template.replace("{value}", f"{(value/1000.0):.2f}")))
+        double_click_max_pause_label = new_label(self.double_click_max_pause_label_template,
+                                                 "Maximum time between two click gestures to trigger a mouse double click")
+        self.config.double_click_max_pause_ms.subscribe_and_run(
+            lambda value: double_click_max_pause_label.setText(self.double_click_max_pause_label_template.replace("{value}", f"{(value/1000.0):.2f}")))
 
         drag_delay_slider = self.create_drag_delay_slider()
-        drag_delay_label = new_label(self.drag_delay_label_template, "Time to hold click gesture to trigger a mouse drag.\n"
-                                                                     "This time begins after a left click has been triggered.")
-        self.config.drag_start_click_delay_ms.subscribe_and_run(lambda value: drag_delay_label.setText(self.drag_delay_label_template.replace("{value}", f"{(value/1000.0):.2f}")))
+        drag_delay_label = new_label(self.drag_delay_label_template,
+                                     "Time to hold click gesture to trigger a mouse drag.\n"
+                                     "This time begins after a left click has been triggered.")
+        self.config.drag_start_click_delay_ms.subscribe_and_run(
+            lambda value: drag_delay_label.setText(self.drag_delay_label_template.replace("{value}", f"{(value/1000.0):.2f}")))
 
         # Layout
         form_layout.addRow(click_delay_label, click_delay_slider)
@@ -67,10 +73,10 @@ class TimingSettingsWidget(QWidget, LogHolder):
 
         return slider
 
-    def create_milliseconds_slider(self, min: int, max: int) -> QSlider:
+    def create_milliseconds_slider(self, minimum: int, maximum: int) -> QSlider:
         slider = QSlider(Qt.Horizontal)
-        slider.setMinimum(min)
-        slider.setMaximum(max)
+        slider.setMinimum(minimum)
+        slider.setMaximum(maximum)
         slider.setSingleStep(25)
         slider.setPageStep(25)
         return slider
